@@ -1,0 +1,248 @@
+{% extends "youtube/layout.html" %}
+{% load static %}
+
+{% block title %}
+    {{profile.username}}'s Profile
+{% endblock %}
+{% block body %}
+<div class="index">
+    <div class="container mb-5 mt-5">
+        <div class="profile-div">
+            <div class="profile-header mb-4">
+                <h1 class="text-center profile-username">
+                    <span id="profile-username-{{profile.id}}" data-edit-id="{{profile.id}}">{{ profile.username }}</span>
+                    <span class="gender-span-{{profile.id}}">
+                    {% if profile.gender == 'female' %}
+                        👩
+                    {% elif profile.gender == 'male' %}
+                        🧑
+                    {% else %}
+                        <i class="bi bi-person-circle"></i>
+                    {% endif %}
+                    </span>
+                </h1>
+            </div>
+            
+            <!-- Following/Followers Info Section -->
+            <div class="info-follow d-flex justify-content-between g-2">
+                <div class="col-auto">
+                    <button type="button" class="btn btn-following bg-body shadow" data-bs-toggle="modal" data-bs-target="#followingModal">
+                        <span class="following-label">Following</span>
+                        <span class="following-count" id="following-{{profile.id}}">{{ profile.following_count }}</span>
+                        <i class="bi bi-people-fill ms-2"></i>
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-following bg-body shadow" data-bs-toggle="modal" data-bs-target="#followersModal">
+                        <span class="followers-label">Followers</span>
+                        <span class="followers-count" id="followers-{{profile.id}}">{{ profile.followers_count }}</span>
+                        <i class="bi bi-people-fill ms-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="profile-main d-flex justify-content-center">
+                {% if user.username != profile.username and user.is_authenticated %}
+                    {% if profile.id in followed %}
+                        <button class="btn btn-secondary unfollow-button"  style="height:10px" id="unfollow-button-{{profile.id}}" data-profile-id="{{ profile.id }}">Unfollow</button>
+                        <button class="btn btn-primary follow-button d-none" style="height:10px" id="follow-button-{{ profile.id }}" data-profile-id="{{ profile.id}}">Follow</button>
+                    {% else %}
+                        <button class="btn btn-primary follow-button" id="follow-button-{{ profile.id }}"  style="height:10px" data-profile-id="{{ profile.id}}">Follow</button>
+                        <button class="btn btn-secondary d-none unfollow-button" id="unfollow-button-{{profile.id}}" style="height:10px" data-profile-id="{{ profile.id }}">Unfollow</button>
+                    {% endif %}
+                {% endif %}
+                {% if user.username == profile.username %}
+                <button class="btn btn-secondary" style="height:10px" data-bs-toggle="modal" data-bs-target="#editProfileModal-{{profile.id}}">⚙️ Edit profile</button>
+                {% endif %}
+            </div>
+            <!-- New Description Box -->
+            <div class="profile-description mb-4 mt-4 p-3 rounded-5">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <p class="card-text text-center" id="profile-description-text-{{profile.id}}">
+                            {% if profile.description %}
+                                {{ profile.description }}
+                            {% else %}
+                                {% if user.username == profile.username %}
+                                    Add a description to tell people about yourself...
+                                {% else %}
+                                    This user hasn't added a description yet.
+                                {% endif %}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <hr>
+    </div>
+    <div class="videos ml-3 mr-3">
+        <div class="row justify-content-center">
+            {% csrf_token %}
+            {% for video in videos %}
+            <div class="col-12 col-md-6 col-lg-3 mb-4">
+                <div class="video-container card shadow-sm p-3">
+                    <h5 class="card-title {% if not video.description%} mb-5 {% endif %}">{{ video.title }}</h5>
+                    {% if video.description %}
+                    <p class="card-text">{{ video.description }}</p>
+                    {% endif %}
+                    <video controls class="w-100" style="height: auto;">
+                        <source src="{{ video.video_file.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p class="mt-2 text-muted">
+                        Uploaded at: {{ video.uploaded_at|date:"Y-m-d H:i" }} by 
+                        <strong><a href="{% url 'user_profile' video.user.id %}">{{ video.user }}</a></strong>
+                    </p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No videos available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade edit-profile-modal" id="editProfileModal-{{profile.id}}" data-edit-id="{{profile.id}}" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Name</label>
+                        <input type="text" 
+                               class="form-control text-muted profile-name-input" 
+                               id="profile-name-{{profile.id}}" 
+                               name="userName" 
+                               data-original-value="{{user.username}}"
+                               value="{{user.username}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="genderOption" class="form-label">Gender</label>
+                        <div class="d-flex align-items-center">
+                            {% if profile.gender == 'male' %}
+                            <i id="gender-icon-{{profile.id}}" 
+                            style="font-size: 1.5rem;" class="mr-1">🧑</i>
+                            {% elif profile.gender == 'female' %}
+                            <i id="gender-icon-{{profile.id}}" 
+                            style="font-size: 1.5rem;" class="mr-1">👩</i>
+                            {% else %}
+                            <i id="gender-icon-{{profile.id}}" 
+                               class="bi bi-person-circle me-2" 
+                               style="font-size: 1.5rem;"></i>
+                            {% endif %}
+                            <select class="form-select gender-option" 
+                                    id="gender-option-{{profile.id}}" 
+                                    name="gender" 
+                                    data-original-value="{{profile.gender}}" >
+                                <option value="none" {% if profile.gender == 'none' %}selected{% endif %}>Prefer not to say</option>
+                                <option value="male" {% if profile.gender == 'male' %}selected{% endif %}>Male</option>
+                                <option value="female" {% if profile.gender == 'female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control profile-description-input" 
+                                  id="profile-description-{{profile.id}}" 
+                                  name="description" 
+                                  data-original-value="{{profile.description}}"
+                                  rows="4" 
+                                  placeholder="Add your profile description">{{profile.description}}</textarea>
+                    </div>
+                    <button type="submit" 
+                            class="btn btn-danger w-100 disabled submit-edit-profile" 
+                            data-edit-id="{{profile.id}}" 
+                            id="submit-edit-profile-{{profile.id}}">Submit Changes <span id="verify-button"><img src="https://cdn3.emoji.gg/emojis/3367-red-verification.gif" width="20px" height="20px" alt="Red_Verification"></span></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Followers Modal -->
+<div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="editProfileModalLabel">Followers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <div class="list-group">
+                    {% for follow in followers %}
+                    <div class="list-group-item d-flex align-items-center mb-3 shadow">
+                        <i class="bi bi-person-circle mr-2"></i>
+                        <div>
+                            <a href="{% url 'user_profile' follow.user.id%}" class="text-decoration-none" style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.user.username }}</h6></a>
+                            <small class="text-muted">{{ follow.user.bio }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <ul class="mt-1">
+                        <li> There aren't any accounts </li>
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Following Modal -->
+<div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="editProfileModalLabel">Following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <div class="list-group">
+                    {% for follow in following %}
+                    <div class="list-group-item d-flex align-items-center mb-3 shadow">
+                        <i class="bi bi-person-circle mr-2"></i>
+                        <div>
+                            <a href="{% url 'user_profile' follow.followed_user.id%}" class="text-decoration-none" style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.followed_user.username }}</h6></a>
+                            <small class="text-muted">{{ follow.followed_user.description }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <ul class="mt-1">
+                        <li> There aren't any accounts </li>
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'youtube/index.js' %}"></script>
+{% endblock %}

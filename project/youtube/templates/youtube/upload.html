@@ -1,0 +1,72 @@
+{% extends "youtube/layout.html" %}
+{% load static %}
+
+{% block title %}
+    Upload
+{% endblock %}
+{% block body %}
+<div>{{ message }}</div>
+<div class="index">
+<h1 class="text-center mt-5"><i class="bi bi-play"></i>Upload a video<i class="bi bi-play"></i></h1>
+<div class="container mt-5">
+    <div class="upload-div d-flex justify-content-center mt-5">
+        <form id="video-upload-form" method="POST" enctype="multipart/form-data" class="p-4 border rounded shadow-sm bg-light w-50 shadow-lg" action="{% url 'upload' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="Ex: A nice video" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <textarea name="description" id="description" class="form-control" placeholder="The description is optional"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="video_file" class="form-label">Upload Video (Max: 50MB):</label>
+                <div class="custom-file">
+                    <input type="file" name="video_file" id="video_file" class="custom-file-input" accept="video/*" required>
+                    <label class="custom-file-label" for="video_file">Choose file</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="image_file" class="form-label">Upload Thumbnail (Optional)</label>
+                <div class="custom-file">
+                    <input type="file" name="image_file" id="image_file" class="custom-file-input" accept="image/*">
+                    <label class="custom-file-label" for="image_file">Choose file</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="category">Select the category of the video: </label>
+                <select class="form-select category_select" required id="category_select" name="category">
+                    <option value="" selected disabled>Category</option>
+                    <option value="game">Games</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="music">Music</option>
+                    <option value="shows">Shows</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="status">Status:</label>
+                <select class="form-select status_select" required id="status_select" name="status">
+                    <option value="public" selected>Public</option>
+                    <option value="unlisted">Unlisted</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary upload-button">
+                    Upload 
+                    <i class="bi bi-upload icon-upload"></i>
+                    <i class="bi bi-check-circle icon-uploaded"></i>
+                </button>
+            </div>
+        </form>
+    </div> 
+</div>
+</div>
+
+
+{% endblock %}
+{% block script %}
+    <script src="{% static 'youtube/index.js' %}"></script>
+{% endblock %}

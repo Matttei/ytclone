@@ -1,0 +1,283 @@
+{% extends "youtube/layout.html" %}
+{% load static %}
+{% block title %}
+    {{ video.title }}
+{% endblock %}
+{% block body %}
+<div class="video-page">
+    <div class="video-div position-relative p-5 shadow-lg bg-body rounded-4">
+        <!-- Video Title -->
+        <h1 class="text-center mb-3 display-4 fw-bold video-title-{{video.id}}">{{ video.title }}</h1>
+        
+        <!-- Video Player -->
+        <div class="text-center">
+            <video controls class="w-75 shadow-lg rounded-4">
+                <source src="{{ video.video_file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Video Description -->
+        <div class="description-div mt-5 p-4 rounded-3 text-dark">
+            <!-- Header as a Tab -->
+            <div class="description-header position-absolute mb-5">
+                <h2 class="m-0"><span class="video-title-{{video.id}}">{{ video.title }}</span>'s Description</h2>
+            </div>
+            <!-- Description Content -->
+            {% if video.description %}
+            <p class="mb-0 fs-5 mt-5" id="video-description-{{ video.id }}">{{ video.description }}</p>
+            {% else %}
+            <br>
+            <ul class="text-center" style="list-style-position: inside;">
+                <li>There isn't a description attached to this video.</li>
+            </ul>
+            {% endif %}
+            <hr style="color: grey;">
+
+            <!-- Likes Counter -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="likes" style="background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); font-size: 1rem;">
+                    ❤️ <span id="like-counter-{{video.id}}" data-post-id="{{video.id}}">{{video.like_counter}}</span> Likes
+                </div>
+                <div class="comments" style="background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); font-size: 1rem;">
+                    💬 <span id="comment-counter">0</span> Comments
+                </div>
+            </div>
+            <h5 class="uploader-div">
+                Uploaded by 
+                <a href="{% url 'user_profile' video.user.id %}" class="uploader-link">
+                    <strong>{{ video.user.username }}</strong>
+                </a> 
+                at {{ video.uploaded_at }} 🕒
+            </h5>          
+        </div>
+        <div class="views d-flex justify-content-center w-75 m-auto mt-n3" style="padding: 0.5rem 1rem; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); font-size: 1rem; margin-top: -1rem !important;">
+            👁️ <span class="mr-2">{{video.views}}</span> <strong>Views</strong>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="button-container w-75 mx-auto mt-4 d-flex justify-content-between align-items-center">
+            {% if video.id in liked %}
+            <button class="btn btn-dark w-33 py-2 px-4 fw-bold unlike-button" id="unlike-button-{{video.id}}" data-post-id="{{video.id}}" title="I don't like this">💔🔨</button>
+            <button class="btn btn-danger w-33 py-2 px-4 fw-bold like-button d-none" id="like-button-{{video.id}}" data-post-id="{{video.id}}" title="I like this">❤️</button>
+            {% else %}
+            <button class="btn btn-danger w-33 py-2 px-4 fw-bold like-button" id="like-button-{{video.id}}" data-post-id="{{video.id}}" title="I like this">❤️</button>
+            <button class="btn btn-dark w-33 py-2 px-4 fw-bold unlike-button d-none" id="unlike-button-{{video.id}}" data-post-id="{{video.id}}" title="I don't like this">💔🔨</button>
+            {% endif %}
+            <button class="btn btn-success w-33 py-2 px-4 fw-bold">💬 Comment</button>
+            {% if not request.user == video.user %}
+            <button class="btn btn-danger w-33 py-2 px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#reportModal">🚩 Report</button>
+            {% else %}
+            <button class="btn btn-secondary w-33 py-2 px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#editProfileModal">⚙️ Edit Video</button>
+            <!-- Sa adaug delete video + confirmarea + edit title-->
+            {% endif %}
+        </div>
+    </div>
+    <div class="comments-div position-relative p-5 shadow-lg bg-body rounded-4 mb-3" data-uploader-username="{{ video.user.username }}">
+        <h3 class="text-center mb-5">Add a Comment</h3>
+        <form class="comment-form mb-4" action="{% url 'video_comment' video.id%}" method="POST" data-comment-id="{{video.id}}">
+            {% csrf_token %}
+            <div class="form-group position-relative">
+                <textarea 
+                    class="form-control shadow-sm transition-all duration-300 focus:shadow-lg commentTextarea-{{video.id}}" 
+                    id="commentTextarea"
+                    name="comment"
+                    placeholder="Add a comment..."
+                    rows="3"
+                    data-comment-id="{{video.id}}"
+                    style="resize: none; border-radius: 0.75rem; padding: 1rem;"
+                ></textarea>
+                <button 
+                    type="submit"
+                    data-comment-id="{{video.id}}" 
+                    class="btn btn-primary position-absolute send-comment-button submit-comment-{{video.id}}" 
+                    style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                >
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </form>
+        <hr>
+        <div class="comments-container">
+            <h3 class="text-center mb-4">Comments</h3>
+            
+            <ul class="list-unstyled">
+                {% for comment in comments %}
+                <li class="mb-3" id="comment-{{ comment.id }}" data-comment-id="{{comment.id}}">
+                    <div class="comment-card">
+                        <div class="comment-header">
+                            <div class="d-flex align-items-center">
+                                {% if comment.user.username == video.user.username %}
+                                <span class="uploader-badge me-2">Uploader</span>
+                                {% endif %}
+                                <strong><a href="{% url 'user_profile' comment.user.id %}" class="text-decoration-none" style="color: black;">{{ comment.user.username }}</a></strong>
+                            </div>
+                            <small class="text-muted">{{ comment.created_at|date:"M d, Y h:i A" }}</small>
+                        </div>
+                        <div class="comment-body">
+                            <p>{{ comment.comment }}</p>
+                        </div>
+                        <div class="comment-footer d-flex justify-content-between">
+                            <div class="d-flex align-items-center">
+                                {% if comment.id in liked_comments %}
+                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button d-none" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
+                                        👍 Like
+                                    </button>
+                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
+                                        💔🔨
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
+                                        👍 Like
+                                    </button>
+                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
+                                        💔🔨
+                                    </button>
+                                {% endif %}
+                                <span id="comment-like-counter-{{ comment.id }}" class="text-muted">
+                                     Likes: {{ comment.like_counter }}
+                                </span>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-secondary btn-sm reply-button mr-2" 
+                                        data-bs-toggle="collapse" 
+                                        data-comment-id="{{ comment.id }}"
+                                        data-bs-target="#reply-to-{{ comment.id }}" 
+                                        aria-expanded="false" 
+                                        aria-controls="reply-to-{{ comment.id }}">
+                                    💬 Reply
+                                </button>
+                                {% if request.user.id == video.user.id or request.user.id == comment.user.id%}
+                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{comment.id}}">DELETE <i class="bi bi-trash"></i></button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="collapse reply-section mt-3 ml-5 mb-5" id="reply-to-{{ comment.id }}">
+                            <label for="reply-text-{{ comment.id }}" class="form-label text-muted">Reply to {{comment.user.username}}</label>
+                            <textarea 
+                                class="form-control shadow-sm transition-all duration-300 focus:shadow-lg" 
+                                rows="2" 
+                                placeholder="Write your reply here..."
+                                style="resize: none; border-radius: 0.75rem; padding: 1rem;" 
+                                id="reply-text-{{ comment.id }}"></textarea>
+                            <button
+                                type="submit" 
+                                class="btn btn-primary position-absolute send-btn" 
+                                data-comment-id="{{ comment.id }}"
+                                style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                                >
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="no-comments">There aren't any comments related to this video</li>
+                {% endfor %}
+            </ul>
+        </div>  
+    </div>
+    
+</div>
+
+<!--Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Issue</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'report_video' video.id%}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Your Name</label>
+                        <input type="text" class="form-control text-muted" id="userName" name="userName" value="{{user.username}}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="issueMinute" class="form-label">Minute of Issue</label>
+                        <input type="number" class="form-control" id="issueMinute" name="issueMinute" placeholder="Enter the minute you saw the issue" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" placeholder="Describe the issue" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="uploadFile" class="form-label">Upload a Screenshot/Video</label>
+                        <input type="file" class="form-control" id="uploadFile" name="uploadFile" accept="image/*,video/*">
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100">Submit Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Edit Video Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Main Form (initially visible) -->
+                <form method="post" enctype="multipart/form-data" id="editForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="videoTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="videoTitle-{{video.id}}" name="title" value="{{ video.title }}" data-video-edit-id="{{video.id}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Video's Description</label>
+                        <textarea class="form-control" id="description-{{video.id}}" name="description" rows="2">{{video.description}}</textarea>
+                    </div>
+                    <div class="mb-3 d-flex justify-content-center">
+                        <button type="button" class="btn btn-outline-danger" id="deleteBtn">Delete Video</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category">Select the category of the video: </label>
+                        <select class="form-select category_select" required id="category_select-{{ video.id }}" name="category">
+                            {% for value, label in video.CATEGORY_CHOICES %}
+                                <option value="{{ value }}" {% if video.category == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>                        
+                    </div>
+                    <div class="mb-3">
+                        <label for="status_select">Status:</label>
+                        <select class="form-select status_select" required id="status_select-{{video.id}}" name="status">
+                            {% for value, label in video.STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if video.status == value %} selected {% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-danger w-100" data-video-edit-id="{{video.id}}" id="saveChanges">Save Changes</button>
+                </form>
+
+                <!-- Delete Confirmation (initially hidden) -->
+                <div id="deleteConfirmation" style="display: none;">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                        <h4>Are you sure?</h4>
+                        <p>This action cannot be undone. All video data will be permanently deleted.</p>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-secondary" id="cancelDelete">Cancel</button>
+                        <a class="btn btn-danger" id="confirmDelete" data-delete-id="{{video.id}}">Delete Permanently</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'youtube/index.js' %}"></script>
+{% endblock %}
