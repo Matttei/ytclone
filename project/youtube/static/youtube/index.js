@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(videoUploadForm);
             const fileInput = document.getElementById('video_file');
             const file = fileInput.files[0];
-            const max = 50 * 1024 * 1024; // 50MB max size
+            const max = 50 * 1024 * 1024; // 50MB
     
             if (file.size > max) {
                 alert('The maximum size is 50MB. Please upload a smaller file.');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.follow-button').forEach(button => {
         button.addEventListener('click', function() {
-            const profileId = this.getAttribute('data-profile-id');  // Use profileId here
+            const profileId = this.getAttribute('data-profile-id');  
             const followButton = document.querySelector(`#follow-button-${profileId}`);
             const unfollowButton = document.querySelector(`#unfollow-button-${profileId}`);
             const counter = document.querySelector(`#followers-${profileId}`);
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.unfollow-button').forEach(button => {
         button.addEventListener('click', function() {
-            const profileId = this.getAttribute('data-profile-id');  // Use profileId here
+            const profileId = this.getAttribute('data-profile-id');  
             const followButton = document.querySelector(`#follow-button-${profileId}`);
             const unfollowButton = document.querySelector(`#unfollow-button-${profileId}`);
             const counter = document.querySelector(`#followers-${profileId}`);
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentPath = window.location.pathname;
             const indexSection = document.querySelector('.index');
             const followingTab = document.querySelector('.following-tab');
-            const buttonText = this.textContent.trim(); // Use textContent for comparison
+            const buttonText = this.textContent.trim(); 
 
             if (currentPath === '/') {
                 if (indexSection && followingTab) {
@@ -276,14 +276,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const selectedValue = genderOptions.value;
         
             if (selectedValue === 'male') {
-                gender.classList.remove('bi', 'bi-person-circle'); // Remove Bootstrap default classes
-                gender.innerHTML = '🧑'; // Male icon
+                gender.classList.remove('bi', 'bi-person-circle'); 
+                gender.innerHTML = '🧑'; 
             } else if (selectedValue === 'female') {
-                gender.classList.remove('bi', 'bi-person-circle'); // Remove Bootstrap default classes
-                gender.innerHTML = '👩'; // Female icon
+                gender.classList.remove('bi', 'bi-person-circle'); 
+                gender.innerHTML = '👩'; 
             } else {
-                gender.classList.add('bi', 'bi-person-circle'); // Add Bootstrap default classes
-                gender.innerHTML = ''; // Clear any custom icon
+                gender.classList.add('bi', 'bi-person-circle'); 
+                gender.innerHTML = ''; 
             }
         
             checkForChanges();
@@ -307,7 +307,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 },
-                // Remove any Content-Type header to let the browser set it automatically
             })
             .then(response => {
                 if (!response.ok) {
@@ -359,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Comment CREATE
     document.querySelectorAll('.comment-form').forEach(form => {
         form.addEventListener('submit', function (e) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
     
             const videoId = this.getAttribute('data-comment-id');
             const commentTextarea = document.querySelector(`.commentTextarea-${videoId}`);
@@ -383,12 +382,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     // Get uploader's username
                     const uploaderUsername = form.closest('.comments-div').getAttribute('data-uploader-username');
-    
-                    // Create new comment element
+
                     const commentsList = form.closest('.comments-div').querySelector('.comments-container ul');
                     const noCommentsMessage = commentsList.querySelector('li:only-child');
     
-                    // Remove "no comments" message if it exists
+                    // Remove "no comments"
                     if (noCommentsMessage && noCommentsMessage.textContent.includes("aren't any comments")) {
                         noCommentsMessage.remove();
                     }
@@ -461,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     successMsg.textContent = 'Comment posted successfully!';
                     form.appendChild(successMsg);
     
-                    // Remove success message after 3 seconds
+                    // Remove success msg
                     setTimeout(() => {
                         successMsg.remove();
                     }, 3000);
@@ -495,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-        // Like and Unlike a comment using event delegation
+        // Footer actions
         document.querySelector('.comments-container').addEventListener('click', function (e) {
             // Delete a comment
             if (e.target.classList.contains('delete-comment-button')) {
@@ -580,19 +578,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const commentButton = document.querySelector('.btn-success');
     
     commentButton.addEventListener('click', function() {
-        // Get the video ID from the nearest comment form
+        // Get the video id
         const videoId = document.querySelector('.comment-form').getAttribute('data-comment-id');
         
         // Get the textarea
         const textarea = document.querySelector(`.commentTextarea-${videoId}`);
-        
-        // Scroll to the textarea smoothly
+
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
         // Wait for scroll to complete before focusing
         setTimeout(() => {
             textarea.focus();
-        }, 500); // 500ms delay to ensure smooth scroll completes
+        }, 500); // 500ms delay 
     });
     const reportButton = document.querySelector('.video-page .btn-danger[data-bs-target="#reportModal"]');
     
@@ -608,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
             textArea.scrollIntoView({behavior: 'smooth'});
             setTimeout(() => {
                 textArea.focus();
-            }, 500); // 500ms delay to ensure smooth scroll completes
+            }, 500); // 500ms delay 
         })
     });
 
@@ -637,7 +634,6 @@ document.addEventListener('DOMContentLoaded', function () {
         editForm.style.display = 'block';
         deleteConfirmation.style.display = 'none';
     });
-    // Use event delegation for dynamic buttons
     document.addEventListener('click', function(e) {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         if (e.target.id === 'confirmDelete') {
