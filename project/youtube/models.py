@@ -121,15 +121,20 @@ class Comment(models.Model):
     like_counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="commented_video")
+    parent_comment = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+
     def serialize(self):
-        return{
+        return {
             "id": self.id,
             "user": self.user.serialize(),
             "video": self.video.serialize(),
             "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             "comment": self.comment,
-            "like_counter": self.like_counter
+            "like_counter": self.like_counter,
+            "parent_comment": self.parent_comment.id if self.parent_comment else None,
+            "replies": [reply.serialize() for reply in self.replies.all()]
         }
+
     def __str__(self):
         return f"{self.user.username} commented on video with id '{self.video.id}' on {self.created_at.strftime('%H:%M:%S')}"
     

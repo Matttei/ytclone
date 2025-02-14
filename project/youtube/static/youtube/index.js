@@ -396,57 +396,63 @@ document.addEventListener('DOMContentLoaded', function () {
                     const isUploader = data.profile.username === uploaderUsername;
                     newComment.innerHTML = `
                     <li class="mb-3" id="comment-${data.comment.id}" data-comment-id="${data.comment.id}">
-                        <div class="comment-card">
-                            <div class="comment-header">
+                        <div class="comment-card p-3 rounded shadow-sm">
+                            <div class="comment-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     ${isUploader ? '<span class="uploader-badge me-2">Uploader</span>' : ''}
                                     <strong><a href="/profile/${data.profile.id}" class="text-decoration-none" style="color: black;">${data.profile.username}</a></strong>
                                 </div>
-                                <small class="text-muted">${new Date().toLocaleString()}</small>
+                                <small class="text-muted">${new Date(data.comment.created_at).toLocaleString()}</small>
                             </div>
                             
                             <div class="comment-body">
-                                <p class="card-text text-dark">${data.comment.comment}</p>
+                                <p>${data.comment.comment}</p>
                             </div>
                             
                             <div class="comment-footer d-flex justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="${data.comment.id}" id="like-comment-button-${data.comment.id}">
-                                            👍 Like
-                                        </button>
-                                        <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="${data.comment.id }" id="unlike-comment-button-${data.comment.id}">
-                                            💔🔨
-                                        </button>
-                                        <span id="comment-like-counter-${data.comment.id}" class="text-muted">0 Likes</span>
-                                    </div>
-                                    
-                                    <div>
-                                    <button class="btn btn-outline-secondary btn-sm reply-button mr-2" 
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="${data.comment.id}" id="like-comment-button-${data.comment.id}">
+                                        👍 Like
+                                    </button>
+                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="${data.comment.id}" id="unlike-comment-button-${data.comment.id}">
+                                        💔🔨
+                                    </button>
+                                    <span id="comment-like-counter-${data.comment.id}" class="text-muted">0 Likes</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-outline-secondary btn-sm reply-button mr-2"
                                             data-bs-toggle="collapse" 
                                             data-bs-target="#reply-to-${data.comment.id}" 
                                             aria-expanded="false" 
                                             aria-controls="reply-to-${data.comment.id}">
                                         💬 Reply
                                     </button>
-                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}">DELETE <i class="bi bi-trash"></i></button>
-                                    </div>
-                                </div>
-                                
-                                <div class="collapse reply-section mt-3" id="reply-to-${data.comment.id}">
-                                    <textarea 
-                                        class="form-control mb-2" 
-                                        rows="2" 
-                                        placeholder="Write your reply here..." 
-                                        id="reply-text-${data.comment.id}"></textarea>
-                                    <button 
-                                        class="btn btn-success btn-sm post-reply-button" 
-                                        data-comment-id="${data.comment.id}">
-                                        Post Reply
+                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}">
+                                        DELETE <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
+                            </div>
+                            
+                            <div class="collapse reply-section mt-3" id="reply-to-${data.comment.id}">
+                                <textarea 
+                                    class="form-control mb-2" 
+                                    rows="2" 
+                                    placeholder="Write your reply here..." 
+                                    id="reply-text-${data.comment.id}"></textarea>
+                                <button 
+                                    class="btn btn-success btn-sm post-reply-button reply-comment-button" 
+                                    data-comment-id="${data.comment.id}"
+                                    data-video-id=${data.video.id}>
+                                    Submit Reply
+                                </button>
+                            </div>
+                    
+                            <!-- Replies List -->
+                            <ul class="replies-list list-unstyled ms-4"></ul>
                         </div>
                     </li>
-                `;
+                    `;
+                    
                     newComment.classList.add('mb-3');
                     commentsList.insertBefore(newComment, commentsList.firstChild);
     
@@ -492,11 +498,92 @@ document.addEventListener('DOMContentLoaded', function () {
                 commentTextarea.disabled = false;
             });
         });
-    });
-        // Footer actions
-        document.querySelector('.comments-container').addEventListener('click', function (e) {
+    });    
+    // Footer actions
+    document.querySelector('.comments-container').addEventListener('click', function (e) {
+            // Reply action
+            if (e.target.classList.contains('reply-comment-button')) {
+                e.preventDefault();
+                const videoId = e.target.getAttribute('data-video-id');
+                const parentNodeId = e.target.getAttribute('data-comment-id');
+                const replyText = document.getElementById(`reply-text-${parentNodeId}`);
+        
+                if (!replyText || !replyText.value.trim()) {
+                    alert("Reply cannot be empty!");
+                    return;
+                }
+        
+                e.target.disabled = true;
+        
+                fetch(`/video/comment/${videoId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        comment: replyText.value.trim(),
+                        parent_comment_id: parentNodeId
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Find the parent comment div
+                        const parentComment = document.getElementById(`comment-${parentNodeId}`);
+                        // Debug test parent not found at first comment
+                        if (!parentComment) {
+                            console.error(`Parent comment element with ID comment-${parentNodeId} not found.`);
+                            return;
+                        }
+        
+                        // Find or create replies list
+                        let repliesList = parentComment.querySelector('.replies-list');
+                        if (!repliesList) {
+                            repliesList = document.createElement('ul');
+                            repliesList.classList.add('replies-list', 'list-unstyled', 'ms-4');
+                            // Add it inside the comment-card div
+                            parentComment.querySelector('.comment-card').appendChild(repliesList);
+                        }
+        
+                        // Create the new reply element
+                        const newReply = document.createElement('li');
+                        newReply.setAttribute('id', `reply-${data.comment.id}`);
+                        newReply.classList.add('mt-2');
+                        newReply.innerHTML = `
+                            <div class="comment-card bg-light p-3 rounded">
+                                <div class="d-flex justify-content-between">
+                                    <strong><a href="/profile/${data.profile.id}" class="text-decoration-none" style="color: black;">${data.profile.username}</a></strong>
+                                    <small class="text-muted">${new Date(data.comment.created_at).toLocaleString()}</small>
+                                </div>
+                                <div class="comment-body">
+                                    <p>${data.comment.comment}</p>
+                                </div>
+                            </div>
+                        `;
+        
+                        // Add the reply to the list
+                        repliesList.appendChild(newReply);
+        
+                        // Clear the reply input
+                        replyText.value = '';
+        
+                        // Collapse the reply form
+                        const replyCollapse = bootstrap.Collapse.getInstance(document.getElementById(`reply-to-${parentNodeId}`));
+                        if (replyCollapse) {
+                            replyCollapse.hide();
+                        }
+                    } else {
+                        console.error('Error:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
+                    e.target.disabled = false;
+                });
+            }
             // Delete a comment
-            if (e.target.classList.contains('delete-comment-button')) {
+            else if (e.target.classList.contains('delete-comment-button')) {
                 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 const commentId = e.target.getAttribute('data-comment-id');
                 const commentDiv = document.getElementById(`comment-${commentId}`);
@@ -518,6 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(error => console.error("Error:", error));
             }
+            // Like a comment
             else if (e.target.classList.contains('like-comment-button')) {
                 const commentId = e.target.getAttribute('data-comment-id');
                 const likeBtn = document.querySelector(`#like-comment-button-${commentId}`);
@@ -545,7 +633,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error("Error:", error);
                 });
             } 
-            
+            // Unlike 
             else if (e.target.classList.contains('unlike-comment-button')) {
                 const commentId = e.target.getAttribute('data-comment-id');
                 const likeBtn = document.querySelector(`#like-comment-button-${commentId}`);

@@ -181,7 +181,7 @@ def view_video(request, video_id):
             "video": video,
             "liked": liked,
             "liked_comments": liked_comments,
-            "comments": Comment.objects.filter(video=video)
+            "comments": Comment.objects.filter(video=video, parent_comment=None)
         })
         except Video.DoesNotExist:
             return render(request, "youtube/index.html",{
@@ -339,14 +339,17 @@ def comment(request, video_id):
             video = Video.objects.get(pk=video_id)
             user = User.objects.get(pk=request.user.id)
             comment = data.get('comment')
+            parent_id = data.get('parent_comment_id', None)
             
             if not comment or not comment.strip():
                 return JsonResponse({"success": False, "error": "Comment cannot be empty."}, status=400)
             
-            comment_save = Comment.objects.create(user=user, comment=comment, video=video)
+            parent_comment = Comment.objects.filter(id=parent_id).first() if parent_id else None
+            comment_save = Comment.objects.create(user=user, comment=comment, video=video, parent_comment=parent_comment)
             return JsonResponse({
                 "success": True,
                 "comment": comment_save.serialize(),
+                "video": video.serialize(),
                 "profile": user.serialize()
             })
         except json.JSONDecodeError:

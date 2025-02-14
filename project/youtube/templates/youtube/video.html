@@ -100,12 +100,11 @@
         <hr>
         <div class="comments-container">
             <h3 class="text-center mb-4">Comments</h3>
-            
             <ul class="list-unstyled">
                 {% for comment in comments %}
                 <li class="mb-3" id="comment-{{ comment.id }}" data-comment-id="{{comment.id}}">
-                    <div class="comment-card">
-                        <div class="comment-header">
+                    <div class="comment-card p-3 rounded shadow-sm">
+                        <div class="comment-header d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 {% if comment.user.username == video.user.username %}
                                 <span class="uploader-badge me-2">Uploader</span>
@@ -120,23 +119,21 @@
                         <div class="comment-footer d-flex justify-content-between">
                             <div class="d-flex align-items-center">
                                 {% if comment.id in liked_comments %}
-                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button d-none" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
-                                        👍 Like
-                                    </button>
-                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
-                                        💔🔨
-                                    </button>
+                                <button class="btn btn-outline-primary btn-sm me-2 like-comment-button d-none" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
+                                    👍 Like
+                                </button>
+                                <button class="btn btn-danger btn-sm me-2 unlike-comment-button" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
+                                    💔🔨
+                                </button>
                                 {% else %}
-                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
-                                        👍 Like
-                                    </button>
-                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
-                                        💔🔨
-                                    </button>
+                                <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="{{ comment.id }}" id="like-comment-button-{{comment.id}}">
+                                    👍 Like
+                                </button>
+                                <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{comment.id}}">
+                                    💔🔨
+                                </button>
                                 {% endif %}
-                                <span id="comment-like-counter-{{ comment.id }}" class="text-muted">
-                                     Likes: {{ comment.like_counter }}
-                                </span>
+                                <span id="comment-like-counter-{{ comment.id }}" class="text-muted">Likes: {{ comment.like_counter }}</span>
                             </div>
                             <div>
                                 <button class="btn btn-outline-secondary btn-sm reply-button mr-2" 
@@ -147,36 +144,45 @@
                                         aria-controls="reply-to-{{ comment.id }}">
                                     💬 Reply
                                 </button>
-                                {% if request.user.id == video.user.id or request.user.id == comment.user.id%}
-                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{comment.id}}">DELETE <i class="bi bi-trash"></i></button>
+                                {% if request.user.id == video.user.id or request.user.id == comment.user.id %}
+                                <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{comment.id}}">
+                                    DELETE <i class="bi bi-trash"></i>
+                                </button>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="collapse reply-section mt-3 ml-5 mb-5" id="reply-to-{{ comment.id }}">
                             <label for="reply-text-{{ comment.id }}" class="form-label text-muted">Reply to {{comment.user.username}}</label>
-                            <textarea 
-                                class="form-control shadow-sm transition-all duration-300 focus:shadow-lg" 
-                                rows="2" 
-                                placeholder="Write your reply here..."
-                                style="resize: none; border-radius: 0.75rem; padding: 1rem;" 
-                                id="reply-text-{{ comment.id }}"></textarea>
-                            <button
-                                type="submit" 
-                                class="btn btn-primary position-absolute send-btn" 
-                                data-comment-id="{{ comment.id }}"
-                                style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
-                                >
-                                <i class="bi bi-send"></i>
+                            <textarea class="form-control shadow-sm" rows="2" placeholder="Write your reply here..." style="resize: none;" id="reply-text-{{ comment.id }}"></textarea>
+                            <button type="submit" class="btn btn-primary reply-comment-button mt-2" data-comment-id="{{ comment.id }}" data-video-id="{{ video.id }}">
+                                Submit
                             </button>
                         </div>
+                        <ul class="replies-list list-unstyled ms-4 mt-3">
+                            {% for reply in comment.replies.all %}
+                            <li id="reply-{{ reply.id }}">
+                                <div class="comment-card bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong><a href="{% url 'user_profile' reply.user.id %}" class="text-decoration-none" style="color: black;">{{ reply.user.username }}</a></strong>
+                                            <small class="text-muted ms-2">{{ reply.created_at|date:"M d, Y h:i A" }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="comment-body">
+                                        <p>{{ reply.comment }}</p>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </li>
                 {% empty %}
                 <li class="no-comments">There aren't any comments related to this video</li>
                 {% endfor %}
             </ul>
-        </div>  
-    </div>
+        </div>
+        
     
 </div>
 
