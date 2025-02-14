@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     id="reply-text-${data.comment.id}"></textarea>
                                 <button
                                 type="submit" 
-                                class="btn btn-primary position-absolute send-btn reply-comment-button" 
+                                class="btn btn-primary position-absolute send-btn reply-comment-button mb-3" 
                                 data-comment-id="${data.comment.id}"
                                 data-video-id=${data.video.id}
                                 style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">

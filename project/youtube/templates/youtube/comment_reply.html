@@ -3,7 +3,7 @@
         <!-- Reply Header, Body, Footer -->
         <div class="d-flex justify-content-between">
             <div>
-                <strong><a href="{% url 'user_profile' comment.user.id %}" class="text-decoration-none" style="color: black;">{{ comment.user.username }}</a></strong>
+                <strong><a href="{% url 'user_profile' comment.user.id %}" class="text-decoration-none" style="color: black;">{{ comment.user.username }} </a></strong>
                 <small class="text-muted ms-2">{{ comment.created_at|date:"M d, Y h:i A" }}</small>
             </div>
         </div>
