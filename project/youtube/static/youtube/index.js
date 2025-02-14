@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (urlParams.has('deleted')) {
         showMessage('🎥 Video deleted successfully!', true);
     }
+    //Star transformation
+    document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
+        star.addEventListener('click', function() {
+            this.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 200);
+        });
+    });
     
     // Dropdown Menu
     const usernameLink = document.querySelector('.nav-link strong');
@@ -439,12 +448,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                     rows="2" 
                                     placeholder="Write your reply here..." 
                                     id="reply-text-${data.comment.id}"></textarea>
-                                <button 
-                                    class="btn btn-success btn-sm post-reply-button reply-comment-button" 
-                                    data-comment-id="${data.comment.id}"
-                                    data-video-id=${data.video.id}>
-                                    Submit Reply
-                                </button>
+                                <button
+                                type="submit" 
+                                class="btn btn-primary position-absolute send-btn reply-comment-button mb-3" 
+                                data-comment-id="${data.comment.id}"
+                                data-video-id=${data.video.id}
+                                style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-send"></i>
+                            </button>
+                                
                             </div>
                     
                             <!-- Replies List -->
@@ -838,8 +850,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
-    // Delete a comment function
-
 });
 
 function showMessage(message, isSuccess = false) {
