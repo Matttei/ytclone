@@ -503,18 +503,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.comments-container').addEventListener('click', function (e) {
             // Reply action
             if (e.target.classList.contains('reply-comment-button')) {
-                e.preventDefault();
                 const videoId = e.target.getAttribute('data-video-id');
                 const parentNodeId = e.target.getAttribute('data-comment-id');
                 const replyText = document.getElementById(`reply-text-${parentNodeId}`);
-        
+
+                replyText.scrollIntoView({behavior: 'smooth'});
+                setTimeout(() => {
+                    textArea.focus();
+                }, 500); // 500ms delay 
                 if (!replyText || !replyText.value.trim()) {
                     alert("Reply cannot be empty!");
                     return;
                 }
         
                 e.target.disabled = true;
-        
                 fetch(`/video/comment/${videoId}/`, {
                     method: 'POST',
                     headers: {
@@ -551,16 +553,65 @@ document.addEventListener('DOMContentLoaded', function () {
                         newReply.setAttribute('id', `reply-${data.comment.id}`);
                         newReply.classList.add('mt-2');
                         newReply.innerHTML = `
-                            <div class="comment-card bg-light p-3 rounded">
-                                <div class="d-flex justify-content-between">
-                                    <strong><a href="/profile/${data.profile.id}" class="text-decoration-none" style="color: black;">${data.profile.username}</a></strong>
-                                    <small class="text-muted">${new Date(data.comment.created_at).toLocaleString()}</small>
+                        <li class="mb-3" id="comment-${data.comment.id}" data-comment-id="${data.comment.id}">
+                        <div class="comment-card bg-light p-3 rounded">
+                            <div class="d-flex justify-content-between">
+                                <strong><a href="/profile/${data.profile.id}" class="text-decoration-none" style="color: black;">${data.profile.username}</a></strong>
+                                <small class="text-muted">${new Date(data.comment.created_at).toLocaleString()}</small>
+                            </div>
+                            <div class="comment-body">
+                                <p>${data.comment.comment}</p>
+                            </div>
+                            <div class="comment-footer d-flex justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-primary btn-sm me-2 like-comment-button ${data.comment.liked ? 'd-none' : ''}" 
+                                            data-comment-id="${data.comment.id}" 
+                                            id="like-comment-button-${data.comment.id}">
+                                        👍 Like
+                                    </button>
+                                    <button class="btn btn-danger btn-sm me-2 unlike-comment-button ${data.comment.liked ? '' : 'd-none'}" 
+                                            data-comment-id="${data.comment.id}" 
+                                            id="unlike-comment-button-${data.comment.id}">
+                                        💔🔨
+                                    </button>
+                                    <span class="text-muted" id="comment-like-counter-${data.comment.id}">
+                                        Likes: ${data.comment.like_counter}
+                                    </span>
                                 </div>
-                                <div class="comment-body">
-                                    <p>${data.comment.comment}</p>
+                                <div>
+                                    <button class="btn btn-outline-secondary btn-sm reply-button mr-2" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#reply-to-${data.comment.id}" 
+                                            aria-expanded="false" 
+                                            data-comment-id=${data.comment.id}
+                                            aria-controls="reply-to-${data.comment.id}">
+                                        💬 Reply
+                                    </button>
+                                    <button class="btn btn-danger btn-sm delete-comment-button" 
+                                            data-comment-id="${data.comment.id}">
+                                        DELETE <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                        `;
+                            <div class="collapse reply-section mt-3" id="reply-to-${data.comment.id}">
+                                <textarea 
+                                    class="form-control mb-2" 
+                                    rows="2" 
+                                    placeholder="Write your reply here..." 
+                                    id="reply-text-${data.comment.id}"></textarea>
+                                <button
+                                type="submit" 
+                                class="btn btn-primary position-absolute send-btn reply-comment-button" 
+                                data-comment-id="${data.comment.id}"
+                                data-video-id=${data.video.id}
+                                style="bottom: 1rem; right: 1rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-send"></i>
+                            </button>
+                            </div>
+                        </div>
+                        </li>
+                    `;
+                    
         
                         // Add the reply to the list
                         repliesList.appendChild(newReply);
@@ -674,7 +725,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Wait for scroll to complete before focusing
+        // Wait for scroll 
         setTimeout(() => {
             textarea.focus();
         }, 500); // 500ms delay 
