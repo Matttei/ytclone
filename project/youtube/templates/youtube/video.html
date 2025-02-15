@@ -40,7 +40,7 @@
                     ❤️ <span id="like-counter-{{video.id}}" data-post-id="{{video.id}}">{{video.like_counter}}</span> Likes
                 </div>
                 <div class="comments" style="background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); font-size: 1rem;">
-                    💬 <span id="comment-counter">0</span> Comments
+                    💬 <span id="comment-counter-{{video.id}}">{{comment_count}}</span> Comments
                 </div>
             </div>
             <h5 class="uploader-div">
@@ -148,7 +148,7 @@
                                     💬 Reply
                                 </button>
                                 {% if request.user.id == video.user.id or request.user.id == comment.user.id %}
-                                <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{ comment.id }}">
+                                <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{ comment.id }}" data-video-id="{{video.id}}">
                                     DELETE <i class="bi bi-trash"></i>
                                 </button>
                                 {% endif %}

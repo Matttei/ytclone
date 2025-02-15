@@ -181,7 +181,8 @@ def view_video(request, video_id):
             "video": video,
             "liked": liked,
             "liked_comments": liked_comments,
-            "comments": Comment.objects.filter(video=video, parent_comment=None)
+            "comments": Comment.objects.filter(video=video, parent_comment=None),
+            "comment_count": Comment.objects.filter(video=video).count()
         })
         except Video.DoesNotExist:
             return render(request, "youtube/index.html",{
@@ -349,6 +350,7 @@ def comment(request, video_id):
             return JsonResponse({
                 "success": True,
                 "comment": comment_save.serialize(),
+                "count": Comment.objects.filter(video=video).count(),
                 "video": video.serialize(),
                 "profile": user.serialize()
             })
@@ -522,7 +524,10 @@ def comment_delete(request, comment_id):
                 return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
             
             comment.delete()
-            return JsonResponse({"success": True})
+            return JsonResponse({
+                "success": True,
+                "count": Comment.objects.filter(video=comment.video).count()
+            })
         
         except (Comment.DoesNotExist, User.DoesNotExist):
             return JsonResponse({"success": False, "error": "Comment/User not found"}, status=404)

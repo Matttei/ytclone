@@ -20,7 +20,7 @@
                         <hr style="width: 25%; color:grey;" class="d-flex justify-content-center m-auto mb-3">
                         <!-- Video Description -->  
                         {% if video.description %}
-                        <p class="card-text mb-4" style="max-height: 10px;">{{ video.description }}</p>
+                        <p class="card-text mb-4">{{ video.description|truncatechars:50 }}</p>
                         {% endif %}
     
                         <!-- Thumbnail Image -->

@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             aria-controls="reply-to-${data.comment.id}">
                                         💬 Reply
                                     </button>
-                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}">
+                                    <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}" data-video-id="${data.video.id}">
                                         DELETE <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -470,13 +470,14 @@ document.addEventListener('DOMContentLoaded', function () {
     
                     // Clear textarea
                     commentTextarea.value = '';
-    
+                    // Update the comment count
+                    document.getElementById(`comment-counter-${videoId}`).innerHTML = data.count;
                     // Show success message
                     const successMsg = document.createElement('div');
                     successMsg.className = 'alert alert-success mt-2';
                     successMsg.textContent = 'Comment posted successfully!';
                     form.appendChild(successMsg);
-    
+                    
                     // Remove success msg
                     setTimeout(() => {
                         successMsg.remove();
@@ -600,7 +601,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                         💬 Reply
                                     </button>
                                     <button class="btn btn-danger btn-sm delete-comment-button" 
-                                            data-comment-id="${data.comment.id}">
+                                            data-comment-id="${data.comment.id}"
+                                            data-video-id="${data.video.id}">
                                         DELETE <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -630,7 +632,8 @@ document.addEventListener('DOMContentLoaded', function () {
         
                         // Clear the reply input
                         replyText.value = '';
-        
+                        // Update the comment count
+                        document.getElementById(`comment-counter-${videoId}`).innerHTML = data.count;
                         // Collapse the reply form
                         const replyCollapse = bootstrap.Collapse.getInstance(document.getElementById(`reply-to-${parentNodeId}`));
                         if (replyCollapse) {
@@ -649,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
             else if (e.target.classList.contains('delete-comment-button')) {
                 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 const commentId = e.target.getAttribute('data-comment-id');
+                const videoId = e.target.getAttribute('data-video-id');
                 const commentDiv = document.getElementById(`comment-${commentId}`);
         
                 fetch(`/video/comment/delete/${commentId}/`, {
@@ -661,7 +665,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        commentDiv.remove(); 
+                        commentDiv.remove();
+                        // Update the comment count
+                        document.getElementById(`comment-counter-${videoId}`).innerHTML = data.count; 
                     } else {
                         console.error("Error:", data.error);
                     }
