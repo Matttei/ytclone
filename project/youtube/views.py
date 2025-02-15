@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory
+from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback
 from django.contrib import messages
 import requests
 from django.utils.timezone import now
@@ -548,3 +548,20 @@ def watch_history(request):
         except User.DoesNotExist:
             return JsonResponse({"success": False, "error": "User not found"}, status=404)
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400) 
+
+
+def feedback(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user = User.objects.get(username=data['userName'])
+            rating = int(data['rating'])
+            description = data.get('description', '')
+
+            Feedback.objects.create(user=user, star=rating, comment=description)
+
+            return JsonResponse({"success": True, "message": "Feedback submitted successfully!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    
+    return JsonResponse({"success": False, "message": "Invalid request method."})

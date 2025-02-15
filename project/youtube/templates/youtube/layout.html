@@ -159,13 +159,13 @@
                             </div>
                             <!-- Modal Body -->
                             <div class="modal-body">
-                                <form method="post" enctype="multipart/form-data">
+                                <form method="post" enctype="multipart/form-data" class="feedback-modal">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="userName" class="form-label">Your Name</label>
                                         <input type="text" class="form-control text-muted" id="userName" name="userName" value="{{user.username}}" readonly>
                                     </div>
-                                    <div class="mb-n3">
+                                    <div class="mb-n2">
                                         <h5 class="text-center mb-n3">Rating</h5>
                                         <div class="rating-card p-4 d-flex justify-content-center">
                                             <div class="star-rating animated-stars">
@@ -181,6 +181,10 @@
                                                 <label for="star1" class="bi bi-star-fill"></label>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Your feedback</label>
+                                        <textarea cols="3" rows="2" class="form-control" id="feedback-description" name="feedback-description" placeholder="Example: 'Great website!'"></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-danger w-100">Submit</button>
                                 </form>

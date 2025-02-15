@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (urlParams.has('deleted')) {
         showMessage('🎥 Video deleted successfully!', true);
     }
+    else if(urlParams.has('feedback')){
+        showMessage('📝 Feedback submitted successfully!', true);
+    }
     //Star transformation
     document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
         star.addEventListener('click', function() {
@@ -258,6 +261,47 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+    // Feedback Modal Handler
+    document.querySelector('.feedback-modal').addEventListener('submit', function(e){
+        // Prevent the feedback form submission
+        e.preventDefault();
+        const rating = document.querySelector('input[name="rating"]:checked');
+        const description = document.getElementById('feedback-description');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const userName = document.getElementById('userName').value;
+        // Make sure the user provided a rating
+        if (!rating){
+            alert("Please select a rating before submitting!");
+            return;
+        }
+        // Create the form
+        const formData = {
+            rating: rating.value,
+            userName: userName,
+            description: description.value
+        };
+        // Fetch the request
+        fetch('/feedback/', {
+            method: 'POST',
+            headers:{
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(res => res.json())
+        .then(data =>{
+            if (data.success){
+                // Redirect to main page
+                window.location.href = '/?feedback=true'; 
+            }
+            else{
+                alert("Error submitting feedback. Please try again!");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+
 
     // Edit profile functions
     document.querySelectorAll('.edit-profile-modal').forEach(modal => {

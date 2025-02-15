@@ -176,3 +176,18 @@ class WatchHistory(models.Model):
     watched_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         ordering = ["-watched_at"]  
+
+class Feedback(models.Model):
+    STAR_CHOICES=[
+        (1, '★☆☆☆☆ 1 Star'),
+        (2, '★★☆☆☆ 2 Stars'),
+        (3, '★★★☆☆ 3 Stars'),
+        (4, '★★★★☆ 4 Stars'),
+        (5, '★★★★★ 5 Stars'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    star = models.IntegerField(choices=STAR_CHOICES, default=5)
+    comment = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.star} Stars"
