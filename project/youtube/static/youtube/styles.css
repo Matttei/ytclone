@@ -47,28 +47,43 @@ body {
 .navbar-toggler:hover {
     transform: rotate(90deg);
 }
+/* Sidebar Styling */
 .sidebar {
     position: fixed;
     top: 56px;
-    border-radius: 20px;
-    bottom: 0;
     left: 0;
+    bottom: 0;
+    width: 250px; /* Fixed width */
+    border-radius: 20px;
     border: 1px solid hsl(0, 32%, 69%);
-    margin: 10px;
-    padding: 20px 0;
     background-color: #fff;
     border-right: 1px solid #dee2e6;
     z-index: 100;
+    overflow-y: auto; /* Enables scrolling */
+    padding-top: 20px;
 }
 
+/* Hide scrollbar for WebKit browsers */
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+/* Sidebar links */
 .sidebar .nav-item {
     width: 100%;
     margin-bottom: 8px;
 }
 
 .sidebar .nav-link {
-    padding: 8px 16px;
+    padding: 10px 16px;
     color: #030303;
+    display: flex;
+    align-items: center;
     text-decoration: none;
     transition: all 0.3s;
 }
@@ -82,19 +97,76 @@ body {
     margin-right: 8px;
 }
 
+/* Sidebar copyright text */
 .sidebar .copyright {
     position: absolute;
-    bottom: 50px;
+    bottom: 20px;
     width: 100%;
     text-align: center;
-    padding: 0 16px;
+    font-size: 12px;
+    padding: 0 10px;
 }
 
-@media (min-width: 768px) {
-    main {
-        margin-left: 8.333333%;
+/* Adjust sidebar for smaller screens */
+@media (max-width: 991px) {
+    .sidebar {
+        width: 200px; /* Slightly smaller for mobile */
+        padding: 10px 0;
+    }
+    .index {
+        margin-left: 200px !important;  /* Adjust margin accordingly */
+        width: 100%
     }
 }
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100px;
+    }
+
+    .sidebar .nav-link {
+        justify-content: center;
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .sidebar .nav-link i {
+        margin-right: 0;
+    }
+
+    .sidebar .nav-text {
+        display: none;
+    }
+    .index {
+        margin-left: 0 !important; /* Keep full width */
+        width: 100%;
+    }
+}
+
+/* Feedback Button Fix */
+.sidebar .btn-danger {
+    width: 90%;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    margin: 10px auto;
+}
+
+/* Adjust feedback button for smaller screens */
+@media (max-width: 768px) {
+    .sidebar .btn-danger {
+        width: 80%;
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+.sidebar.collapsed + .index {
+    margin-left: 0;
+    width: 100%;
+}
+
 .upload-div {
     width: 100%;
     max-width: 100%;
@@ -213,15 +285,10 @@ body {
 
 /* Main Content Area */
 .index {
+    margin-left: 250px; /* Default space for sidebar */
     margin-top: 100px;
-    width: 100%;
-}
-
-/* Video Grid and Container Styles */
-.video-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    width: calc(100% - 200px); 
+    transition: margin-left 0.3s ease;
 }
 
 .video-container {
@@ -506,7 +573,11 @@ body {
 
 @media (max-width: 768px) {
     .video-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+    .index {
+        margin-left: 0 !important;
+        width: 100%;
     }
 }
 
@@ -645,7 +716,6 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
-/* Like button specific styles */
 .like-button i, 
 .unlike-button i {
     transition: transform 0.3s ease-in-out;
@@ -689,7 +759,7 @@ body {
 /* Comment and report button hover effects */
 .btn-success:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); /* Green shadow */
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); 
 }
 
 
@@ -710,15 +780,15 @@ body {
     opacity: 1;
 }
 .uploader-div .uploader-link {
-    color: grey; /* Set the initial color */
-    text-decoration: none; /* Remove underline */
-    display: inline-block; /* Required for scaling */
+    color: grey; 
+    text-decoration: none; 
+    display: inline-block; 
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .uploader-div .uploader-link:hover {
-    transform: translateY(-1.5px); /* Scale the element */
-    color: black; /* Optional: Change color on hover */
+    transform: translateY(-1.5px); 
+    color: black; 
 }
 .gender-option option{
     transition: transform 0.3s ease;
