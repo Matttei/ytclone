@@ -99,11 +99,8 @@ body {
 
 /* Sidebar copyright text */
 .sidebar .copyright {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
     text-align: center;
-    font-size: 12px;
+    font-size: 16px;
     padding: 0 10px;
 }
 

@@ -371,6 +371,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     // Update the profile username in the UI
                     document.querySelector(`#profile-username-${profileId}`).innerHTML = data.profile.username;
+                    document.querySelectorAll(`.uploaded-div-${profileId}`).forEach(div =>{
+                        div.innerHTML = data.profile.username;
+                    })
                     
                     // Update the description in the UI
                     const descriptionElement = document.querySelector(`#profile-description-text-${profileId}`);
