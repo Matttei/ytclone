@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback
+from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback, RedeemCode, ReedemCodeHistory
 from django.contrib import messages
 import requests
 from django.utils.timezone import now
@@ -308,21 +308,47 @@ def edit_profile(request, profile_id):
     if request.method == 'POST':
         try:
             profile = User.objects.get(pk=profile_id)
-            editedName = request.POST.get('userName')
-            description = request.POST.get('description', '')  # Default to empty string if None
+            editedName = request.POST.get('userName', '')
+            description = request.POST.get('description', '') 
+            redeem_code = request.POST.get('redeemcode', '').strip()
             gender = request.POST.get('gender')
-            
-            if not editedName:
+            names = User.objects.all().values_list('username', flat=True)
+            # Edited name/desc/gender
+            if editedName and editedName in names:
                 return JsonResponse({
                     "success": False,
-                    "error": "Provide the new name!"
-                }, status=400)
-            
-            profile.username = editedName
+                    "error": "Username already used!"
+                })
+            if editedName:
+                profile.username = editedName
             profile.description = description or ''  # Ensure we never save None
             profile.gender = gender
             profile.save()
-            
+            # Reedeem a code
+            if redeem_code:
+                try:
+                    code = RedeemCode.objects.get(code=redeem_code)
+                    if ReedemCodeHistory.objects.filter(user=profile, code=code).exists():
+                        return JsonResponse({
+                            "success": False,
+                            "error": "You have already used this code!",
+                        })
+                    if code.uses <= 0 or profile.premium:
+                        return JsonResponse({"success": False, "error": "This code has already been used or you are not eligible!"})
+                    ReedemCodeHistory.objects.create(user=profile, code=code)
+                    code.uses -= 1
+                    code.save()
+
+                    profile.premium = True
+                    profile.save()
+                    return JsonResponse({
+                    "success": True,
+                    "redeem_message": "Code used succesfully!",
+                    "profile": profile.serialize(),
+                    "redeem_successful": True
+                    })
+                except RedeemCode.DoesNotExist:
+                    return JsonResponse({"success": False, "error": "Invalid code."})
             return JsonResponse({
                 "success": True,
                 "profile": profile.serialize(),

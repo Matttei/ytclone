@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function () {
     else if(urlParams.has('feedback')){
         showMessage('📝 Feedback submitted successfully!', true);
     }
+    else if(urlParams.has('redeem')){
+        showMessage('✅ Promocode activated!', true);
+    }
     //Star transformation
     document.querySelectorAll('.star-rating:not(.readonly) label').forEach(star => {
         star.addEventListener('click', function() {
@@ -312,14 +315,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const submitBtn = document.querySelector(`#submit-edit-profile-${profileId}`);
         const genderOptions = document.querySelector(`#gender-option-${profileId}`);
         const genderSpan = document.querySelector(`.gender-span-${profileId}`);
+        const redeemcode = document.getElementById(`redeem-code-input-${profileId}`);
         
         // Check for changes in inputs
         const checkForChanges = () => {
             const nameChanged = nameInput.value !== nameInput.getAttribute('data-original-value');
             const descriptionChanged = descriptionInput.value !== descriptionInput.getAttribute('data-original-value');
             const genderChanged = genderOptions.value !== genderOptions.getAttribute('data-original-value');
+            const redeemCodeChanged = redeemcode.value.trim() !== "";
+
             
-            if (nameChanged || descriptionChanged || genderChanged) {
+            if (nameChanged || descriptionChanged || genderChanged || redeemCodeChanged) {
                 submitBtn.classList.remove('disabled');
             } else {
                 submitBtn.classList.add('disabled');
@@ -345,15 +351,20 @@ document.addEventListener('DOMContentLoaded', function () {
         // Add event listeners to inputs
         nameInput.addEventListener('input', checkForChanges);
         descriptionInput.addEventListener('input', checkForChanges);
+        redeemcode.addEventListener('input', checkForChanges);
         
         // Handle form submission
         submitBtn.addEventListener('click', (e) => {
             e.preventDefault();
             
             const formData = new FormData();
-            formData.append('userName', nameInput.value);
+            if (nameInput.value !== nameInput.getAttribute('data-original-value')){
+                formData.append('userName', nameInput.value);
+            }
             formData.append('description', descriptionInput.value);
             formData.append('gender', genderOptions.value);
+            formData.append('redeemcode', redeemcode.value);
+            // Fetch the data
             fetch(`/profile/edit/${profileId}/`, {
                 method: 'POST',
                 body: formData,
@@ -371,6 +382,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     // Update the profile username in the UI
                     document.querySelector(`#profile-username-${profileId}`).innerHTML = data.profile.username;
+                    // Change the menu name
+                    document.getElementById(`menu-name-${profileId}`).innerHTML = data.profile.username;
+                    // Change the uploaded at part
                     document.querySelectorAll(`.uploaded-div-${profileId}`).forEach(div =>{
                         div.innerHTML = data.profile.username;
                     })
@@ -399,8 +413,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Close the modal
                     const modalInstance = bootstrap.Modal.getInstance(modal);
                     modalInstance.hide();
+                    if (data.redeem_successful){
+                        window.location.href = '/?redeem=true'; 
+                    }
                 } else {
-                    alert(data.error || 'Failed to update profile');
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    modalInstance.hide();
+                    showMessage(data.error, false);
                 }
             })
             .catch(error => {

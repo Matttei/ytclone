@@ -9,17 +9,22 @@
     <div class="container mb-5 mt-5">
         <div class="profile-div shadow-sm">
             <div class="profile-header mb-4">
-                <h1 class="text-center profile-username">
-                    <span id="profile-username-{{profile.id}}" data-edit-id="{{profile.id}}">{{ profile.username }}</span>
-                    <span class="gender-span-{{profile.id}}">
-                    {% if profile.gender == 'female' %}
-                        👩
-                    {% elif profile.gender == 'male' %}
-                        🧑
-                    {% else %}
-                        <i class="bi bi-person-circle"></i>
-                    {% endif %}
+                <h1 class="text-center profile-username d-flex align-items-center justify-content-center gap-2">
+                    <span id="profile-username-{{profile.id}}" name="profile-name" data-edit-id="{{profile.id}}">
+                        {{ profile.username }}
                     </span>
+                    <span class="gender-span-{{profile.id}}">
+                        {% if profile.gender == 'female' %}
+                            👩
+                        {% elif profile.gender == 'male' %}
+                            🧑
+                        {% else %}
+                            <i class="bi bi-person-circle"></i>
+                        {% endif %}
+                    </span>
+                    {% if profile.premium %}
+                        <span class="badge bg-warning text-dark mt-3" >Premium</span>
+                    {% endif %}
                 </h1>
             </div>
             
@@ -173,6 +178,10 @@
                                   rows="4" 
                                   placeholder="Add your profile description">{{profile.description}}</textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="redeemcode" class="form-label">Redeem Code</label>
+                        <input name="redeemcode" class="form-control redeem-code-input" id="redeem-code-input-{{profile.id}}" placeholder="Ex: ABCD">
+                    </div>
                     <button type="submit" 
                             class="btn btn-danger w-100 disabled submit-edit-profile" 
                             data-edit-id="{{profile.id}}" 
@@ -199,7 +208,7 @@
                     <div class="list-group-item d-flex align-items-center mb-3 shadow">
                         <i class="bi bi-person-circle mr-2"></i>
                         <div>
-                            <a href="{% url 'user_profile' follow.user.id%}" class="text-decoration-none" style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.user.username }}</h6></a>
+                            <a href="{% url 'user_profile' follow.user.id%}" class="text-decoration-none" {% if follow.user.premium %} style="color: rgb(255, 193, 7);" {% endif %} style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.user.username }}</h6></a>
                             <small class="text-muted">{{ follow.user.description|truncatechars:50 }}</small>
                         </div>
                     </div>
@@ -235,7 +244,7 @@
                     <div class="list-group-item d-flex align-items-center mb-3 shadow">
                         <i class="bi bi-person-circle mr-2"></i>
                         <div>
-                            <a href="{% url 'user_profile' follow.followed_user.id%}" class="text-decoration-none" style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.followed_user.username }}</h6></a>
+                            <a href="{% url 'user_profile' follow.followed_user.id%}" class="text-decoration-none" {% if follow.followed_user.premium %} style="color: rgb(255, 193, 7);" {% endif %}style="color: hsl(0, 39%, 43%);"><h6 class="mb-0 fw-bold">{{ follow.followed_user.username }}</h6></a>
                             <small class="text-muted">{{ follow.followed_user.description }}</small>
                         </div>
                     </div>

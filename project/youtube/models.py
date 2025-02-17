@@ -14,6 +14,7 @@ class User(AbstractUser):
     followers_count = models.IntegerField(default=0)
     following_count = models.IntegerField(default=0)
     allowed = models.BooleanField(default=False)
+    premium = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True, default='')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='none')
 
@@ -190,4 +191,19 @@ class Feedback(models.Model):
     comment = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.star} Stars"
+        return f"USER: {self.user.username} with id '{self.user.id}' - {self.star} Stars"
+    
+
+
+class RedeemCode(models.Model):
+    uses = models.IntegerField(default=0)
+    code = models.CharField(max_length=32, unique=True)
+
+class ReedemCodeHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.ForeignKey(RedeemCode, on_delete=models.CASCADE)
+    used_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"User '{self.user.username}' user code '{self.code.code}' at {self.used_at.strftime('%Y-%m-%d %H:%M:%S')}"
+

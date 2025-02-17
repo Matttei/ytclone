@@ -18,9 +18,12 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-body shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="/" name="logo">
                 Youtube <img src="{% static 'youtube/assets/icon.png'%}" class="img-fluid" style="height: 25px;" alt="Youtube Icon">
             </a>
+            {% if user.is_authenticated and user.premium %}
+                <label for="logo" class="badge bg-warning text-dark ms-2">Premium</label>
+            {% endif %}
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -31,7 +34,7 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <strong>{{ user.username }} <span class="menu-closed" style="color:red">☰</span><span class="menu-opened d-none" style="color:red">☷</span></strong>
+                                <strong><span id="menu-name-{{profile.id}}">{{ user.username }}</span><span class="menu-closed" style="color:red">☰</span><span class="menu-opened d-none" style="color:red">☷</span></strong>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <div class="menu-row">
@@ -131,7 +134,7 @@
                     <hr>
                     <li class="nav-item">
                         <button class="btn btn-danger w-33 py-2 px-4 fw-bold ml-3 mr-2" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                            <i class="bi bi-info-square-fill"></i>
+                            <i class="bi bi-info-square-fill mr-1"></i>
                             <span class="nav-text">Send Feedback</span>
                         </button>
                     </li>

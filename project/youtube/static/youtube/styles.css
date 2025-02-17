@@ -282,9 +282,9 @@ body {
 
 /* Main Content Area */
 .index {
-    margin-left: 250px; /* Default space for sidebar */
+    margin-left: 225px; /* Default space for sidebar */
     margin-top: 100px;
-    width: calc(100% - 200px); 
+    width: calc(100% - 225px);
     transition: margin-left 0.3s ease;
 }
 
@@ -325,6 +325,7 @@ body {
     color: inherit;
     text-decoration: none;
 }
+/* Main Content Area */
 
 /* Video Page Styles */
 .video-page {
