@@ -47,14 +47,14 @@ def login_view(request):
     if request.method == "POST":
 
         # Attempt to sign user in
+        next_url = request.POST.get('next') or "/"
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
-
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return redirect(next_url)
         else:
             return render(request, "youtube/login.html", {
                 "message": "Invalid username and/or password."
@@ -95,7 +95,7 @@ def register(request):
         return render(request, "youtube/register.html")
     
 
-
+@login_required
 def upload(request):
     if request.method == "POST":
         title = request.POST.get('title')
@@ -191,7 +191,7 @@ def view_video(request, video_id):
     return HttpResponseRedirect(reverse('index'))
 
 
-
+@login_required
 def report_video(request, video_id):
     if request.method == 'POST':
         try:
@@ -228,6 +228,7 @@ def report_video(request, video_id):
     return redirect('view_video', video_id=video_id)
 
 
+@login_required
 def follow_profile(request, profile_id):
     if request.method == 'POST':
         try:
@@ -255,7 +256,7 @@ def follow_profile(request, profile_id):
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
 
-
+@login_required
 def unfollow_profile(request, profile_id):
     if request.method == 'POST':
         try:
@@ -276,6 +277,7 @@ def unfollow_profile(request, profile_id):
             return JsonResponse({"success": False, "error": "User not found."}, status=404)
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
+@login_required
 def like_video(request, video_id):
     if request.method == 'POST':
         try:
@@ -303,7 +305,7 @@ def like_video(request, video_id):
     return JsonResponse({"success": False,"error": "Invalid request method."}, status=400)
 
 
-
+@login_required
 def edit_profile(request, profile_id):
     if request.method == 'POST':
         try:
@@ -358,7 +360,7 @@ def edit_profile(request, profile_id):
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
 
-
+@login_required
 def comment(request, video_id):
     if request.method == "POST":
         try:
@@ -386,7 +388,7 @@ def comment(request, video_id):
             return JsonResponse({"success": False, "error": "Video not found."}, status=404)
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
-
+@login_required
 def comment_like(request, comment_id):
     if request.method == 'POST':
         try:
@@ -414,7 +416,7 @@ def comment_like(request, comment_id):
             return JsonResponse({"success": False, "error": "Comment not found."}, status=404)
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
-
+@login_required
 def delete_video(request, video_id):
     if request.method == 'POST':
         try:
@@ -437,7 +439,7 @@ def delete_video(request, video_id):
         "error": "Invalid request method."
         }, status=400)
 
-
+@login_required
 def video_edit(request, video_id):
     if request.method == 'POST':
         try:
@@ -475,7 +477,7 @@ def trending_view(request):
     "error": "Invalid request method."
     }, status=400)
 
-
+@login_required
 def view_uploads(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
@@ -483,10 +485,6 @@ def view_uploads(request):
             videos = Video.objects.filter(user=user)
             return render(request, "youtube/uploads.html",{
                 "videos": videos
-            })
-        else:
-            return render(request, "youtube/uploads.html",{
-                "message": "You must be logged in in order to see this page!"
             })
     return JsonResponse({
     "success": False,
@@ -539,7 +537,7 @@ def music_view(request):
     "error": "Invalid request method."
     }, status=400)
 
-
+@login_required
 def comment_delete(request, comment_id):
     if request.method == 'POST':
         try:
@@ -561,7 +559,7 @@ def comment_delete(request, comment_id):
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
 
-
+@login_required
 def watch_history(request):
     if request.method == 'GET':
         try:
@@ -575,7 +573,7 @@ def watch_history(request):
             return JsonResponse({"success": False, "error": "User not found"}, status=404)
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400) 
 
-
+@login_required
 def feedback(request):
     if request.method == "POST":
         try:

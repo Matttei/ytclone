@@ -296,9 +296,11 @@ body {
     height: 100%; /* Ensures equal height for all cards */
     display: flex;
     flex-direction: column;
+    border-radius: 20px;
     transition: transform 0.3s ease-in-out;
     justify-content: space-between;
 }
+
 
 .video-container img {
     max-height: 180px; /* Adjust thumbnail size */
