@@ -16,6 +16,7 @@
     {% endblock %}
 </head>
 <body>
+    <div class="sidebar-overlay"></div>
     <nav class="navbar navbar-expand-lg navbar-light bg-body shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="/" name="logo">
@@ -25,8 +26,8 @@
                 <label for="logo" class="badge bg-warning text-dark ms-2">Premium</label>
             {% endif %}
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <button id="menuToggle" class="btn btn-outline-dark d-lg-none">
+                <i class="bi bi-list"></i> 
             </button>
     
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -66,9 +67,17 @@
 
     <div class="container-fluid mt-3">
         <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-1 d-none d-md-block sidebar shadow">
+            <!--Phone sidebar-->
+            <div class="col-md-1  d-md-block  sidebar shadow">
                 <ul class="nav flex-column">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'user_profile' user.id %}" class="nav-link">
+                            <i class="bi bi-person"></i>
+                            <span class="nav-text">Account</span>
+                        </a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a href="{% url 'index' %}" class="nav-link">
                             <i class="bi bi-house"></i>
@@ -144,7 +153,6 @@
                     <small class="text-muted">&#169 made by <a href="https://www.instagram.com/matei.dorcea/" target="_blank" class="text-decoration-none">Matei</a></small>
                 </div>
             </div>
-            
             <!-- Main Content -->
             <main class="col-md-11">
                 {% block body %}

@@ -8,7 +8,7 @@ body {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* Navbar Styles - Keeping the improved version */
+/* Navbar Styles - improved version */
 .navbar {
     background: linear-gradient(0deg, transparent, rgba(255, 255, 255, 0.9) 20%, rgba(255, 255, 255, 1) 50%) !important;
     padding: 0.5rem 1rem;
@@ -57,6 +57,7 @@ body {
     border-radius: 20px;
     border: 1px solid hsl(0, 32%, 69%);
     background-color: #fff;
+    transition: left 0.3s ease-in-out;
     border-right: 1px solid #dee2e6;
     z-index: 100;
     overflow-y: auto; /* Enables scrolling */
@@ -103,19 +104,22 @@ body {
     font-size: 16px;
     padding: 0 10px;
 }
-
 /* Adjust sidebar for smaller screens */
 @media (max-width: 991px) {
     .sidebar {
-        width: 200px; /* Slightly smaller for mobile */
-        padding: 10px 0;
+        left: -250px;
     }
     .index {
-        margin-left: 200px !important;  /* Adjust margin accordingly */
+        margin-left: 100px !important;  
         width: 100%
     }
+    .videos{
+        width: 100% !important;
+    }
 }
-
+.sidebar.active {
+    left: 0px !important;
+}
 @media (max-width: 768px) {
     .sidebar {
         width: 100px;
@@ -208,7 +212,7 @@ body {
     padding: 4px 0;
 }
 #video-upload-form {
-    max-width: 600px; /* Larger form width */
+    max-width: 600px; 
     width: 100%;
     background: white;
     padding: 2rem;
@@ -289,13 +293,22 @@ body {
 }
 
 .video-container {
-    margin-bottom: 20px;
-    padding: 10px;
-    aspect-ratio: 16 / 9;
-    border: 1px solid #ddd;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    height: 100%; /* Ensures equal height for all cards */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-in-out;
+    justify-content: space-between;
+}
+
+.video-container img {
+    max-height: 180px; /* Adjust thumbnail size */
+    object-fit: cover;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.video-container h4, .video-container p {
+    margin-bottom: 8px; /* Consistent spacing */
 }
 
 .video-container:hover {

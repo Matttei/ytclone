@@ -49,7 +49,18 @@ document.addEventListener('DOMContentLoaded', function () {
             menu_opened.classList.add('d-none');
         }
     });
+    // Mobile menu
+    const menuToggle = document.getElementById('menuToggle');
+    const Sidebar = document.querySelector('.sidebar');
 
+    menuToggle.addEventListener('click', ()=>{
+        Sidebar.classList.toggle("active");
+    });
+    document.addEventListener('click', function(e){
+        if(!Sidebar.contains(e.target) && !menuToggle.contains(e.target)){
+            Sidebar.classList.remove('active');
+        }
+    });
     const videoUploadForm = document.getElementById('video-upload-form');
     if (videoUploadForm) {
         videoUploadForm.addEventListener('submit', function(event) {
