@@ -207,3 +207,27 @@ class ReedemCodeHistory(models.Model):
     def __str__(self):
         return f"User '{self.user.username}' user code '{self.code.code}' at {self.used_at.strftime('%Y-%m-%d %H:%M:%S')}"
 
+
+
+# Create a playlist
+
+class Playlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="playlist")
+    name = models.CharField(max_length=64)
+    parent_video = models.ForeignKey(Video, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    videosNumber = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"User {self.user.username} create playlist '{self.name}' at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+    
+
+class addPlaylist(models.Model):
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name="add_playlist")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="playlist_video")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"User {self.user.username} added {self.video.title} on playlist '{self.playlist.name}' at {self.added_at.strftime('%Y-%m-%d %H:%M:%S')}"
+    

@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    
     // Message at video delete
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('deleted')) {
@@ -130,6 +131,98 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error("Error:", error);
             });
         });
+    });
+    // Playlist Feature
+    const playlistConfirmation = document.getElementById('createPlaylistSection'); 
+    const playlistSaveForm = document.getElementById('saveform');
+    const playlistCancelSave = document.getElementById('cancelSave');
+    const createPlaylistButton = document.getElementById('create-playlist'); // Corrected to match class
+    const savePlaylistModal = document.getElementById('saveVideoModal');
+
+        if (savePlaylistModal) {
+            // Show modal event
+            savePlaylistModal.addEventListener('show.bs.modal', function() {
+            playlistSaveForm.style.display = 'block';
+            playlistConfirmation.style.display = 'none'; 
+    });
+
+        } else {
+            console.error("Error: saveVideoModal not found in the DOM.");
+        }
+
+    const confirmationSave = document.getElementById('create-playlist-confirmation');
+    // Create a playlist block
+    if (createPlaylistButton)
+    createPlaylistButton.addEventListener('click', (event) => {
+        event.preventDefault(); 
+        playlistSaveForm.style.display = 'none'; 
+        playlistConfirmation.style.display = 'block'; 
+    });
+
+    // Cancel the creation
+    if (playlistCancelSave) {
+        playlistCancelSave.addEventListener('click', () => {
+            playlistSaveForm.style.display = 'block'; 
+            playlistConfirmation.style.display = 'none'; 
+        });
+    }
+    if (confirmationSave)
+    confirmationSave.addEventListener('click', function(e){
+        e.preventDefault();
+        const videoId = e.target.getAttribute('data-video-id');
+        const playlistTitle = document.getElementById(`newPlaylistName-${videoId}`).value;
+        // Fetch the request
+        fetch(`/video/create_playlist/${videoId}/`, {
+            method: 'POST',
+            headers:{
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({title: playlistTitle}),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success){
+                // Close the modal
+                const playlistModalInstance = bootstrap.Modal.getOrCreateInstance(savePlaylistModal);
+                playlistModalInstance.hide();
+                // Show message
+                showMessage(data.message, true);
+            }
+            else{
+                const playlistModalInstance = bootstrap.Modal.getOrCreateInstance(savePlaylistModal);
+                playlistModalInstance.hide();
+                showMessage(data.message, false);
+            }
+        })
+        .catch(err => console.log("Error:", err));
+    });
+    
+    // Tab Switch Buttons
+    const videoTabButton = document.getElementById('video-button');
+    const playlistTabButton = document.getElementById('playlist-button');
+    const videoTabDiv = document.querySelector('.videos-tab');
+    const playlistTabDiv = document.querySelector('.playlist-div');
+
+    if (videoTabButton)
+    videoTabButton.addEventListener('click', () => {
+        console.log("Video Tab Button pressed");
+        videoTabDiv.classList.remove('d-none');
+        playlistTabDiv.classList.add('d-none');
+
+        videoTabButton.classList.remove('btn-outline-danger');
+        videoTabButton.classList.add('btn-danger');
+        playlistTabButton.classList.add('btn-outline-danger');
+        playlistTabButton.classList.remove('btn-danger');
+    });
+    if (playlistTabButton)
+    playlistTabButton.addEventListener('click', () => {
+        playlistTabDiv.classList.remove('d-none');
+        videoTabDiv.classList.add('d-none');
+
+        playlistTabButton.classList.add('btn-danger');
+        playlistTabButton.classList.remove('btn-outline-danger');
+        videoTabButton.classList.add('btn-outline-danger');
+        videoTabButton.classList.remove('btn-danger');
     });
 
 
@@ -933,6 +1026,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+
+
+
+
 });
 
 function showMessage(message, isSuccess = false) {

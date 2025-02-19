@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback, RedeemCode, ReedemCodeHistory
+from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback, RedeemCode, ReedemCodeHistory, Playlist, addPlaylist
 from django.contrib import messages
 import requests
 from django.utils.timezone import now
@@ -142,12 +142,15 @@ def profile(request, profile_id):
         try:
             profile = User.objects.get(pk=profile_id)
             videos = Video.objects.filter(user=profile, status = 'public').order_by('-uploaded_at')
+            # Get the user's playlists (if he has)
+            playlists = Playlist.objects.filter(user=profile)
             followed = []
             if request.user.is_authenticated:
                 followed = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)  
             return render(request, "youtube/profile.html", {
                 "profile": profile,
                 "videos": videos,
+                "playlists": playlists,
                 "followed": followed,
                 "followers": Follower.objects.filter(followed_user=profile),
                 "following": Follower.objects.filter(user=profile),
@@ -589,3 +592,37 @@ def feedback(request):
             return JsonResponse({"success": False, "message": str(e)})
     
     return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
+
+def create_playlist(request, video_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            video = Video.objects.get(pk=video_id)
+            user = request.user  
+            title = data.get('title')
+
+            # Ensure title is provided
+            if not title:
+                return JsonResponse({"success": False, "message": "Playlist title is required."})
+
+            # Create the playlist with the name and update the parent
+            playlist = Playlist.objects.create(user=user, name=title)
+            playlist.parent_video = video
+            playlist.videosNumber += 1
+            playlist.save()
+            
+            # Add the video to the playlist
+            addPlaylist.objects.create(playlist=playlist, video=video, user=user)  
+
+            return JsonResponse({"success": True, "message": "Playlist created successfully."})
+
+        except Video.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Video not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})
+
+

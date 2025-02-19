@@ -57,6 +57,7 @@
         
         <!-- Buttons -->
         <div class="button-container w-75 mx-auto mt-4 d-flex justify-content-between align-items-center">
+            <div class="video-actions">
             {% if video.id in liked %}
             <button class="btn btn-dark w-33 py-2 px-4 fw-bold unlike-button" id="unlike-button-{{video.id}}" data-post-id="{{video.id}}" title="I don't like this">💔🔨</button>
             <button class="btn btn-danger w-33 py-2 px-4 fw-bold like-button d-none" id="like-button-{{video.id}}" data-post-id="{{video.id}}" title="I like this">❤️</button>
@@ -65,6 +66,8 @@
             <button class="btn btn-dark w-33 py-2 px-4 fw-bold unlike-button d-none" id="unlike-button-{{video.id}}" data-post-id="{{video.id}}" title="I don't like this">💔🔨</button>
             {% endif %}
             <button class="btn btn-success w-33 py-2 px-4 fw-bold">💬 Comment</button>
+            <button class="btn btn-light w-33 py-2 px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#saveVideoModal">💾 Save</button>
+            </div>
             {% if not request.user == video.user %}
             <button class="btn btn-danger w-33 py-2 px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#reportModal">🚩 Report</button>
             {% else %}
@@ -281,6 +284,50 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="saveVideoModal" tabindex="-1" aria-labelledby="saveVideoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="saveVideoModalLabel">Add to Playlist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" id="saveform">
+          {% csrf_token %}
+
+          <!-- Create playlist -->
+          <div class="d-flex justify-content-center">
+            <div class="mb-3 w-50">
+              <button type="button" class="btn form-control btn-light w-33 py-2 rounded" id="create-playlist" style="font-size: 1.1rem;">
+                <i class="bi bi-plus"></i> Create Playlist
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success w-100 add-playlist" id="add-playlist-{{video.id}}" data-video-id="{{video.id}}">Add</button>
+        </form>
+        
+          <!-- Create playlist (initially hidden) -->
+          <div id="createPlaylistSection" class="mt-3">
+            <div class="text-center mb-4">
+              <h6 class="fw-bold">Create a new playlist</h6>
+              <input type="text" class="form-control mb-2" id="newPlaylistName-{{video.id}}" placeholder="Enter playlist name">
+              <div class="d-flex justify-content-center gap-3">
+                <button type="submit" class="btn btn-success w-100 create-playlist-confirmation" id="create-playlist-confirmation" data-video-id="{{video.id}}">Create</button>
+                <button type="button" class="btn btn-secondary" id="cancelSave">Cancel</button>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block script %}
     <script src="{% static 'youtube/index.js' %}"></script>

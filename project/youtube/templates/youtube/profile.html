@@ -82,7 +82,13 @@
         </div>
         <hr>
     </div>
-        <div class="videos ml-5 mr-5  p-5 shadow-sm rounded-4">
+    <div class="selector-senction">
+        <div class="d-flex justify-content-center gap-3">
+            <button class="btn btn-danger video-button" id="video-button">Videos</button>
+            <button class="btn btn-outline-danger playlist-button" id="playlist-button">Playlists</button>
+        </div>
+    </div>
+        <div class="videos-tab ml-5 mr-5  p-5 shadow-sm rounded-4">
             <div class="row">
                 {% csrf_token %}
                 {% for video in videos %}
@@ -112,6 +118,41 @@
                             <p class="mt-2 text-muted">
                                 Uploaded at: {{ video.uploaded_at|date:"Y-m-d H:i" }} by 
                                 <strong><a href="{% url 'user_profile' video.user.id %}" class="text-muted"><span class="uploaded-div-{{profile.id}}">{{ video.user }}</span></a></strong>
+                            </p>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <p>No videos available at the moment.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="playlist-container playlist-div p-5 shadow-sm rounded-4 d-none m-auto">
+            <h3 class="text-center mb-4">Created Playlists</h3>
+               <div class="row">
+                {% csrf_token %}
+                {% for playlist in playlists %}
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4 playlist-card" data-video-id="{{video.id}}" id="video-card-{{video.id}}">
+                    <a href="" class="anchor-card text-decoration-none">
+                        <div class="video-container card shadow-sm p-3">
+                            <!-- Video Title -->
+                            <h4 class="card-title {% if not video.description%} mb-5 {% endif %} text-center">{{ playlist.name }}</h4>
+        
+                            <!-- Thumbnail Image -->
+                            <img src="{{ playlist.parent_video.image_file.url}}" class="playlist-image card-img-top" alt="Playlist cover"
+                            class="card-img-top img-fluid" 
+                            style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                        
+                            <hr>
+                            <!-- Views Count -->
+                            <p class="mb-2 text-muted">
+                                <i class="bi bi-eye"></i> 6969 views
+                            </p>
+                            <!-- Uploaded Date and User Info -->
+                            <p class="mt-2 text-muted">
+                                Uploaded at: createdasdad
                             </p>
                         </div>
                     </a>
