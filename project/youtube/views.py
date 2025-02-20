@@ -144,6 +144,7 @@ def profile(request, profile_id):
             videos = Video.objects.filter(user=profile, status = 'public').order_by('-uploaded_at')
             # Get the user's playlists (if he has)
             playlists = Playlist.objects.filter(user=profile)
+            playlistsVideos = addPlaylist.objects.filter(user=profile)
             followed = []
             if request.user.is_authenticated:
                 followed = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)  
@@ -151,6 +152,7 @@ def profile(request, profile_id):
                 "profile": profile,
                 "videos": videos,
                 "playlists": playlists,
+                "test": playlistsVideos,
                 "followed": followed,
                 "followers": Follower.objects.filter(followed_user=profile),
                 "following": Follower.objects.filter(user=profile),
@@ -646,6 +648,7 @@ def addToPlaylist(request, video_id):
             # Add video to playlist
             addPlaylist.objects.create(playlist=playlist, user=user, video=video)
             playlist.videosNumber += 1
+            playlist.created_at = now()
             playlist.save()
 
             return JsonResponse({"success": True, "message": "Video added successfully to the playlist."})
