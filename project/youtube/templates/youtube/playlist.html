@@ -1,0 +1,55 @@
+{% extends "youtube/layout.html" %}
+{% load static %}
+
+{% block title %}
+    Playlist '{{playlist.name}}'
+{% endblock %}
+{% block body %}
+<div class="index">
+    <h1 class="text-center mb-5 mt-5">Playlist {{playlist.name}} <i style="color: red;"  class="bi bi-play-circle-fill"></i></h1>
+    <h2>{{message}}</h2>
+    <div class="videos ml-5 mr-5  p-5 shadow-sm rounded-4">
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4 mb-4 video-card" data-video-id="{{video.video.id}}" id="video-card-{{video.video.id}}">
+                <a href="{% url 'view_video' video.video.id %}" class="anchor-card text-decoration-none">
+                    <div class="video-container card shadow-sm p-3">
+                        <!-- Video Title -->
+                        <h4 class="card-title {% if not video.video.description%} mb-5 {% endif %} text-center">{{ video.video.title }}</h4>
+                        <!-- Video Description -->  
+                        {% if video.video.description %}
+                        <p class="card-text mb-3">{{ video.video.description|truncatechars:50 }}</p>
+                        {% endif %}
+            
+                        <!-- Thumbnail Image -->
+                        <img src="{{ video.video.image_file.url }}" 
+                        alt="{{ video.video.title }} thumbnail" 
+                        class="card-img-top img-fluid" 
+                        style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                    
+                        <hr>
+                        <!-- Views Count -->
+                        <p class="mb-2 text-muted">
+                            <i class="bi bi-eye"></i> {{video.video.views}} views
+                        </p>
+                        <!-- Uploaded Date and User Info -->
+                        <p class="mt-2 text-muted">
+                            Uploaded at: {{ video.video.uploaded_at|date:"Y-m-d H:i" }} by 
+                            <strong><a href="{% url 'user_profile' video.video.user.id %}" class="text-muted text-decoration-none">{{ video.video.user }}</a>{% if video.video.user.premium %}⭐{% endif %}</strong>
+                        </p>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No videos available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'youtube/index.js' %}"></script>
+{% endblock %}

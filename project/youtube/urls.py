@@ -28,5 +28,7 @@ urlpatterns = [
     path('video/comment/delete/<int:comment_id>/', views.comment_delete, name="detele_comment"),
     path('history/', views.watch_history, name="view_history"),
     path('feedback/', views.feedback, name="feedback"),
-    path('video/create_playlist/<int:video_id>/', views.create_playlist, name="create_paylist")
+    path('video/create_playlist/<int:video_id>/', views.create_playlist, name="create_paylist"),
+    path('video/addToPlaylist/<int:video_id>/', views.addToPlaylist, name="addToPlaylist"),
+    path('playlist/<int:playlist_id>/', views.view_playlist, name="view_playlist"),
 ]

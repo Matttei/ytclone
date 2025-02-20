@@ -216,7 +216,7 @@ class Playlist(models.Model):
     name = models.CharField(max_length=64)
     parent_video = models.ForeignKey(Video, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    videosNumber = models.IntegerField(default=0)
+    videosNumber = models.IntegerField(default=1)
 
     def __str__(self):
         return f"User {self.user.username} create playlist '{self.name}' at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"

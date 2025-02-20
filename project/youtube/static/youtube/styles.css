@@ -110,11 +110,14 @@ body {
         left: -250px;
     }
     .index {
-        margin-left: 100px !important;  
+        margin-left: 200px !important;  
         width: 100%
     }
     .videos{
         width: 100% !important;
+    }
+    .video-card{
+        width: 50% !important;
     }
 }
 .sidebar.active {
@@ -178,7 +181,11 @@ body {
 .upload-div:hover{
     transform: translateY(-2px);
 }
-
+.video-card {
+    width: 33%; /* Full width by default */
+    transition: all 0.3s ease;
+    padding: 10px; /* Add some padding for better spacing */
+}
 
 /* Original Dropdown Menu Styles */
 .dropdown-menu {
@@ -613,6 +620,9 @@ body {
     .likes, .comments {
         font-size: 0.8rem;
         padding: 0.4rem 0.8rem !important;
+    }
+    .video-card{
+        width: 100% !important;
     }
 }
 .login-page {

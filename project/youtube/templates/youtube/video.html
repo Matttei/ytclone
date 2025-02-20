@@ -286,7 +286,7 @@
 </div>
 
 
-<!-- Modal -->
+<!--VS Modal -->
 <div class="modal fade" id="saveVideoModal" tabindex="-1" aria-labelledby="saveVideoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -298,19 +298,31 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-        <form method="post" enctype="multipart/form-data" id="saveform">
-          {% csrf_token %}
 
-          <!-- Create playlist -->
-          <div class="d-flex justify-content-center">
-            <div class="mb-3 w-50">
-              <button type="button" class="btn form-control btn-light w-33 py-2 rounded" id="create-playlist" style="font-size: 1.1rem;">
-                <i class="bi bi-plus"></i> Create Playlist
-              </button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-success w-100 add-playlist" id="add-playlist-{{video.id}}" data-video-id="{{video.id}}">Add</button>
-        </form>
+            <form method="post" enctype="multipart/form-data" id="saveform">
+                {% csrf_token %}
+                <!-- Add to playlist -->
+                <div class="form-check d-block">
+                    {% for playlist in playlists %}
+                    <input class="form-check-input" type="radio" name="playlist" id="playlist-{{  playlist.id  }}" value="{{ playlist.id }}">
+                    <label class="form-check-label" for="playlist{{ forloop.counter }}">
+                        {{ playlist.name }}
+                    </label>
+                    <br>
+                    {% empty %}
+                    <p>You don't have any playlists, create one first!</p>
+                    {% endfor %}
+                </div>
+                <!-- Create playlist -->
+                <div class="d-flex justify-content-center">
+                  <div class="mb-3 w-50">
+                    <button type="button" class="btn form-control btn-light w-33 py-2 rounded" id="create-playlist" style="font-size: 1.1rem;">
+                      <i class="bi bi-plus"></i> Create Playlist
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 add-playlist" id="add-playlist-{{video.id}}" data-video-id="{{video.id}}">Add</button>
+              </form>
         
           <!-- Create playlist (initially hidden) -->
           <div id="createPlaylistSection" class="mt-3">

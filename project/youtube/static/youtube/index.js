@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
     // Playlist Feature
     const playlistConfirmation = document.getElementById('createPlaylistSection'); 
     const playlistSaveForm = document.getElementById('saveform');
@@ -146,10 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
             playlistConfirmation.style.display = 'none'; 
     });
 
-        } else {
-            console.error("Error: saveVideoModal not found in the DOM.");
-        }
-
+        } 
     const confirmationSave = document.getElementById('create-playlist-confirmation');
     // Create a playlist block
     if (createPlaylistButton)
@@ -194,10 +192,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 showMessage(data.message, false);
             }
         })
-        .catch(err => console.log("Error:", err));
+        .catch(error => console.error("Error:", error));
     });
     
-    // Tab Switch Buttons
+    // Append a video to a playlist
+
+    const form = document.querySelector('#saveform'); // Select the form
+    
+    if (form)
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); 
+    
+        const playlistSelect = document.querySelector('input[name="playlist"]:checked');
+        const videoId = document.querySelector('.add-playlist').getAttribute('data-video-id');
+
+        // Fetch
+        fetch(`/video/addToPlaylist/${videoId}/`, {
+            method: 'POST',
+            headers:{
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, 
+            },
+            body: JSON.stringify({id: playlistSelect.value}),
+        })
+        .then(res => res.json())
+        .then(data =>{
+            if (data.success){
+                const playlistModalInstance = bootstrap.Modal.getOrCreateInstance(savePlaylistModal);
+                playlistModalInstance.hide();
+                showMessage(data.message, true);
+            }
+            else{
+                const playlistModalInstance = bootstrap.Modal.getOrCreateInstance(savePlaylistModal);
+                playlistModalInstance.hide();
+                showMessage(data.message, false);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+    
+    // Tab Switch Buttons (Playlists/Profile Videos)
     const videoTabButton = document.getElementById('video-button');
     const playlistTabButton = document.getElementById('playlist-button');
     const videoTabDiv = document.querySelector('.videos-tab');
@@ -205,7 +238,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (videoTabButton)
     videoTabButton.addEventListener('click', () => {
-        console.log("Video Tab Button pressed");
         videoTabDiv.classList.remove('d-none');
         playlistTabDiv.classList.add('d-none');
 
@@ -323,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     counter.innerHTML = data.video.like_counter;
                     likeBtn.classList.add('d-none');
                     unlikeBtn.classList.remove('d-none')
-                    console.log("Video liked succesfully!");
                 }
                 else{
                     console.error("Error:", error)
@@ -357,7 +388,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     counter.innerHTML = data.video.like_counter;
                     likeBtn.classList.remove('d-none');
                     unlikeBtn.classList.add('d-none')
-                    console.log("Video liked succesfully!");
                 }
                 else{
                     console.error("Error:", error)
@@ -372,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.feedback-modal').addEventListener('submit', function(e){
         // Prevent the feedback form submission
         e.preventDefault();
-        const rating = document.querySelector('input[name="rating"]:checked');
+        const rating = document.querySelector('input[name="rating"]:checked'); 
         const description = document.getElementById('feedback-description');
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const userName = document.getElementById('userName').value;
@@ -683,16 +713,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });    
     // Footer actions
-    document.querySelector('.comments-container').addEventListener('click', function (e) {
+    const commentsContainer = document.querySelector('.comments-container')
+    if (commentsContainer)
+        commentsContainer.addEventListener('click', function (e) {
             // Reply action
             if (e.target.classList.contains('reply-comment-button')) {
                 const videoId = e.target.getAttribute('data-video-id');
                 const parentNodeId = e.target.getAttribute('data-comment-id');
                 const replyText = document.getElementById(`reply-text-${parentNodeId}`);
-
                 replyText.scrollIntoView({behavior: 'smooth'});
                 setTimeout(() => {
-                    textArea.focus();
+                    replyText.focus();
                 }, 500); // 500ms delay 
                 if (!replyText || !replyText.value.trim()) {
                     alert("Reply cannot be empty!");
@@ -903,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     
     const commentButton = document.querySelector('.btn-success');
-    
+    if (commentButton)
     commentButton.addEventListener('click', function() {
         // Get the video id
         const videoId = document.querySelector('.comment-form').getAttribute('data-comment-id');
@@ -944,19 +975,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteConfirmation = document.getElementById('deleteConfirmation');
     const editModal = document.getElementById('editProfileModal');
 
-    // Reset to edit form when modal is shown
+    if (editModal)
     editModal.addEventListener('show.bs.modal', function() {
         editForm.style.display = 'block';
         deleteConfirmation.style.display = 'none';
     });
 
     // Delete button handler
+    if (deleteBtn)
     deleteBtn.addEventListener('click', function() {
         editForm.style.display = 'none';
         deleteConfirmation.style.display = 'block';
     });
 
     // Cancel button handler
+    if (cancelBtn)
     cancelBtn.addEventListener('click', function() {
         editForm.style.display = 'block';
         deleteConfirmation.style.display = 'none';

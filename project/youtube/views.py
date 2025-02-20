@@ -175,8 +175,10 @@ def view_video(request, video_id):
             video.views += 1
             video.save()
             liked = []
+            playlists = []
             liked_comments = []
             if request.user.is_authenticated:
+                playlists = Playlist.objects.filter(user=user)
                 liked = Like.objects.filter(user=request.user).values_list('video__id', flat=True)
                 liked_comments = CommentLike.objects.filter(user=request.user).values_list('comment__id', flat=True)
                 WatchHistory.objects.update_or_create(user=user, video=video, defaults={"watched_at": now()})
@@ -184,6 +186,7 @@ def view_video(request, video_id):
             "video": video,
             "liked": liked,
             "liked_comments": liked_comments,
+            "playlists": playlists,
             "comments": Comment.objects.filter(video=video, parent_comment=None),
             "comment_count": Comment.objects.filter(video=video).count()
         })
@@ -595,6 +598,7 @@ def feedback(request):
 
 
 
+@login_required
 def create_playlist(request, video_id):
     if request.method == 'POST':
         try:
@@ -603,18 +607,13 @@ def create_playlist(request, video_id):
             user = request.user  
             title = data.get('title')
 
-            # Ensure title is provided
             if not title:
                 return JsonResponse({"success": False, "message": "Playlist title is required."})
 
-            # Create the playlist with the name and update the parent
-            playlist = Playlist.objects.create(user=user, name=title)
-            playlist.parent_video = video
-            playlist.videosNumber += 1
-            playlist.save()
-            
-            # Add the video to the playlist
-            addPlaylist.objects.create(playlist=playlist, video=video, user=user)  
+            # Create the playlist
+            playlist = Playlist.objects.create(user=user, name=title, parent_video=video)
+            # Add video to the playlist
+            addPlaylist.objects.create(playlist=playlist, video=video, user=user)
 
             return JsonResponse({"success": True, "message": "Playlist created successfully."})
 
@@ -626,3 +625,50 @@ def create_playlist(request, video_id):
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
 
+@login_required
+def addToPlaylist(request, video_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            video = Video.objects.get(pk=video_id)
+            user = request.user
+            playlist_id = data.get('id')
+
+            if not playlist_id:
+                return JsonResponse({"success": False, "message": "Playlist ID is required."})
+
+            playlist = Playlist.objects.get(pk=playlist_id)
+
+            # Check if video is already in the playlist
+            if addPlaylist.objects.filter(playlist=playlist, video=video).exists():
+                return JsonResponse({"success": False, "message": "Video already in playlist."})
+
+            # Add video to playlist
+            addPlaylist.objects.create(playlist=playlist, user=user, video=video)
+            playlist.videosNumber += 1
+            playlist.save()
+
+            return JsonResponse({"success": True, "message": "Video added successfully to the playlist."})
+
+        except Playlist.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Playlist not found."})
+        except Video.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Video not found."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
+@login_required
+def view_playlist(request, playlist_id):
+    if request.method == 'GET':
+        try:
+            playlist = Playlist.objects.get(pk=playlist_id)
+            videos = addPlaylist.objects.filter(playlist=playlist)
+            return render(request, "youtube/playlist.html",{
+                "videos": videos,
+                "playlist": playlist
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
