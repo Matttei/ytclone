@@ -31,4 +31,6 @@ urlpatterns = [
     path('video/create_playlist/<int:video_id>/', views.create_playlist, name="create_paylist"),
     path('video/addToPlaylist/<int:video_id>/', views.addToPlaylist, name="addToPlaylist"),
     path('playlist/<int:playlist_id>/', views.view_playlist, name="view_playlist"),
+    path('load_videos/', views.load_videos, name="load_videos"),
+    path('playlist/edit/<int:playlist_id>/', views.edit_playlist, name="edit_playlist")
 ]

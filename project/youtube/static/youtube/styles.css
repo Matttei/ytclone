@@ -1,9 +1,9 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 body {
     margin: 0;
     padding: 0;
     display: flex;
-
+    font-family: "Open Sans", serif;
     min-height: 100vh;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
@@ -181,10 +181,23 @@ body {
 .upload-div:hover{
     transform: translateY(-2px);
 }
+@keyframes smooth-appear {
+    from {
+        transform: translateY(-20px); /* Start 20px above */
+        opacity: 0; /* Start invisible */
+    }
+    to {
+        transform: translateY(0); /* End at original position */
+        opacity: 1; /* Fully visible */
+    }
+}
+
 .video-card {
-    width: 33%; /* Full width by default */
+    width: 33%; 
     transition: all 0.3s ease;
-    padding: 10px; /* Add some padding for better spacing */
+    padding: 10px; 
+    animation: smooth-appear 0.5s ease forwards;
+
 }
 
 /* Original Dropdown Menu Styles */
@@ -301,6 +314,7 @@ body {
 
 .video-container {
     height: 100%; /* Ensures equal height for all cards */
+    position: relative;
     display: flex;
     flex-direction: column;
     border-radius: 20px;
@@ -904,8 +918,8 @@ body {
 
 .reply-section .send-btn {
     position: absolute;
-    bottom: 0.75rem;
-    right: 3rem;
+    top: 4.5rem;
+    right: 1.5rem;
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -961,6 +975,7 @@ body {
     color: #ffc107;
 }
 .playlist-container {
+    position: relative;
     margin-left: 100px;
     max-width: 1200px;
     margin: 0 auto;
@@ -1045,3 +1060,18 @@ body {
     align-items: center;
 }
   
+.playlist-settings {
+    position: absolute;
+    top: 20px; 
+    right: 10px; 
+    background: rgba(0, 0, 0, 0.5); 
+    color: white;
+    padding: 10px;
+    z-index: 1000;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s ease-in;
+}
+.playlist-settings:hover{
+    transform: rotate(15deg) scale(1.1);
+}

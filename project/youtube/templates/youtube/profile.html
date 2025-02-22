@@ -129,39 +129,49 @@
                 {% endfor %}
             </div>
         </div>
+        <!-- Playlists Section -->
         <div class="playlist-container playlist-div p-5 shadow-sm rounded-4 d-none m-auto">
             <h3 class="text-center mb-4">Created Playlists</h3>
-               <div class="row">
+            <div class="row">
                 {% csrf_token %}
                 {% for playlist in playlists %}
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4 playlist-card">
-                    <a href="{% url 'view_playlist' playlist.id %}" class="anchor-card text-decoration-none">
-                        <div class="video-container card shadow-sm p-3 mt-2">
-                            <!-- Video Title -->
-                            <h4 class="card-title {% if not video.description%} mb-5 {% endif %} text-center">{{ playlist.name }}</h4>
-        
-                            <!-- Thumbnail Image -->
-                            <img src="{{ playlist.parent_video.image_file.url}}" class="playlist-image card-img-top" alt="Playlist cover"
-                            class="card-img-top img-fluid" 
-                            style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
-                        
-                            <hr>
-                            <!-- Views Count -->
-                            <p class="mb-2 text-muted">
-                                <i class="bi bi-circle"></i> {{playlist.videosNumber }} Videos
-                            </p>
-                            <!-- Uploaded Date and User Info -->
-                            <p class="mt-2 text-muted">
-                                <strong>Last updated at: {{playlist.created_at|date:"Y-m-d H:i"}}</strong>
-                            
-                            </p>
+                    <!-- Check if the playlist is public or the user is the owner -->
+                    {% if playlist.status == 'public' or request.user.username == playlist.user.username %}
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4 playlist-card">
+                            <!-- Show gear icon only for the owner -->
+                            {% if request.user.username == playlist.user.username %}
+                                <div class="playlist-settings" data-playlist-id="{{playlist.id}}" data-playlist-title="{{playlist.name}}" data-playlist-visibility="{{playlist.status}}" id="divbtn-{{playlist.id}}">
+                                    <i class="bi bi-gear"></i>
+                                </div>
+                            {% endif %}
+                            <!-- Playlist Card Content -->
+                            <a href="{% url 'view_playlist' playlist.id %}" class="anchor-card text-decoration-none">
+                                <div class="video-container card shadow-sm p-3 mt-2">
+                                    <!-- Playlist Title -->
+                                    <h4 class="card-title text-center" id="playlist-title-{{playlist.id}}">{{ playlist.name }}</h4>
+                                    <!-- Thumbnail Image -->
+                                    <img src="{{ playlist.parent_video.image_file.url}}" 
+                                        class="playlist-image card-img-top img-fluid" 
+                                        alt="Playlist cover"
+                                        style="height: 250px; width: 100%; object-fit: cover; border-radius: 8px;">
+                                    <hr>
+                                    <!-- Videos Count -->
+                                    <p class="mb-2 text-muted">
+                                        <i class="bi bi-circle"></i> {{playlist.videosNumber }} Videos
+                                    </p>
+                                    <!-- Last Updated Date -->
+                                    <p class="mt-2 text-muted">
+                                        <strong>Last updated at: {{playlist.created_at|date:"Y-m-d H:i"}}</strong>
+                                    </p>
+                                </div>
+                            </a>
                         </div>
-                    </a>
-                </div>
+                    {% endif %}
                 {% empty %}
-                <div class="col-12 text-center">
-                    <p><strong>{{profile.username}}</strong> doesn't have any playlists.</p>
-                </div>
+                    <!-- Display this if there are no playlists -->
+                    <div class="col-12 text-center">
+                        <p><strong>{{profile.username}}</strong> doesn't have any playlists.</p>
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -305,7 +315,47 @@
         </div>
     </div>
 </div>
-
+<!--Edit Playlist Modal -->
+<div class="modal fade edit-playlist-modal" id="editPlaylistModal" tabindex="-1" aria-labelledby="editPlaylistModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPlaylistModalLabel">Edit Playlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="">
+                    {% csrf_token %}
+                    <!-- Playlist Title -->
+                    <div class="mb-3">
+                        <label for="playlistTitle" class="form-label">Playlist Title</label>
+                        <input type="text" 
+                               class="form-control text-muted playlist-title-input" 
+                               id="playlist-title" 
+                               name="playlistTitle">
+                    </div>
+                    <!-- Playlist Visibility -->
+                    <div class="mb-3">
+                        <label for="playlistVisibility" class="form-label">Visibility</label>
+                        <select class="form-select playlist-visibility-option" 
+                                id="playlist-visibility-option" 
+                                name="playlistVisibility">
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                            <option value="unlisted">Unlisted</option>
+                        </select>
+                    </div>
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="btn btn-danger w-100 submit-edit-playlist" 
+                            id="submit-edit-playlist">
+                        Save Changes 
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}

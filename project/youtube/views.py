@@ -15,34 +15,61 @@ import requests
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 from ipware import get_client_ip
+from django.core.paginator import Paginator
+from django.shortcuts import render
+import requests
+
 def index(request):
     try:
         ip, is_routable = get_client_ip(request)
-        print("Retrieved IP:", ip)
-        token = "98d1607a25f0ca"  
-
+        token = "98d1607a25f0ca"
         url = f"https://www.ipinfo.io/{ip}?token={token}"
         response = requests.get(url)
 
-        if response.status_code == 200:
-            data = response.json()  
-            region = data.get('country', 'Country not found') 
-        else:
-            region = f"Error: Unable to fetch data (status code {response.status_code})"
+        region = response.json().get('country', 'Unknown') if response.status_code == 200 else "Error retrieving location"
+
+        videos = Video.objects.filter(status='public').order_by('-uploaded_at')
+        p = Paginator(videos, 9)
+        page_number = int(request.GET.get('page', 1))
+        page_obj = p.get_page(page_number)
+
+        fvideos = []
+        if request.user.is_authenticated:
+            followed_profiles = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)
+            fvideos = Video.objects.filter(user__id__in=followed_profiles).order_by('-uploaded_at')
+
+        return render(request, "youtube/index.html", {"region": region, "videos": page_obj, "fvideos": fvideos})
+
     except Exception as e:
-        region = f"Error: {e}"
+        return render(request, "youtube/index.html", {"region": f"Error: {e}"})
+
+
+def load_videos(request):
+    try:
+        start = int(request.GET.get('start', 0))
+        end = int(request.GET.get('end', start + 9))
+
+        videos = Video.objects.filter(status='public').order_by('-uploaded_at')[start:end]
+
+        video_list = [
+            {
+                "id": video.id,
+                "title": video.title,
+                "description": video.description,
+                "image_file": video.image_file.url if video.image_file else "",
+                "views": video.views,
+                "uploaded_at": video.uploaded_at.strftime("%Y-%m-%d"),
+                "user": video.user.serialize(),
+            }
+            for video in videos
+        ]
+
+        return JsonResponse({"videos": video_list})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
     
-    fvideos = []
-    if request.user.is_authenticated:
-        followed_profiles = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)
-        fvideos = Video.objects.filter(user__id__in=followed_profiles).order_by('-uploaded_at')
-    return render(request, "youtube/index.html", 
-                  {"region": region,
-                   "videos": Video.objects.filter(status='public').order_by('-uploaded_at'),
-                   "fvideos": fvideos
-                   })
-
-
 def login_view(request):
     if request.method == "POST":
 
@@ -144,7 +171,6 @@ def profile(request, profile_id):
             videos = Video.objects.filter(user=profile, status = 'public').order_by('-uploaded_at')
             # Get the user's playlists (if he has)
             playlists = Playlist.objects.filter(user=profile)
-            playlistsVideos = addPlaylist.objects.filter(user=profile)
             followed = []
             if request.user.is_authenticated:
                 followed = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)  
@@ -152,7 +178,6 @@ def profile(request, profile_id):
                 "profile": profile,
                 "videos": videos,
                 "playlists": playlists,
-                "test": playlistsVideos,
                 "followed": followed,
                 "followers": Follower.objects.filter(followed_user=profile),
                 "following": Follower.objects.filter(user=profile),
@@ -466,6 +491,7 @@ def video_edit(request, video_id):
             return JsonResponse({
                 "success": True,
                 "video": video.serialize(),
+                "message": "Video modified succesfully!"
                 })
         except Video.DoesNotExist:
             return JsonResponse({"success": False, "error": "Video not found"}, status=404)
@@ -490,7 +516,7 @@ def view_uploads(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
             user = User.objects.get(pk=request.user.id)
-            videos = Video.objects.filter(user=user)
+            videos = Video.objects.filter(user=user, status='unlisted')
             return render(request, "youtube/uploads.html",{
                 "videos": videos
             })
@@ -608,12 +634,13 @@ def create_playlist(request, video_id):
             video = Video.objects.get(pk=video_id)
             user = request.user  
             title = data.get('title')
+            status = data.get('status')
 
             if not title:
                 return JsonResponse({"success": False, "message": "Playlist title is required."})
 
             # Create the playlist
-            playlist = Playlist.objects.create(user=user, name=title, parent_video=video)
+            playlist = Playlist.objects.create(user=user, name=title, parent_video=video, status=status)
             # Add video to the playlist
             addPlaylist.objects.create(playlist=playlist, video=video, user=user)
 
@@ -668,10 +695,78 @@ def view_playlist(request, playlist_id):
     if request.method == 'GET':
         try:
             playlist = Playlist.objects.get(pk=playlist_id)
-            videos = addPlaylist.objects.filter(playlist=playlist)
+            videos = addPlaylist.objects.filter(playlist=playlist).order_by('-added_at')
             return render(request, "youtube/playlist.html",{
                 "videos": videos,
                 "playlist": playlist
             })
+        except Playlist.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Playlist not found."
+            }, status=404)
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid request method."
+    }, status=405)
+
+@login_required
+def edit_playlist(request, playlist_id):
+    if request.method == 'POST':
+        try:
+            playlist = Playlist.objects.get(pk=playlist_id)
+            user = request.user
+
+            # Parse the request body
+            data = json.loads(request.body)
+            title = data.get('title')
+            status = data.get('status')
+
+            # Check if the title or status has changed
+            title_changed = title != playlist.name
+            status_changed = status != playlist.status
+
+            # If no changes were made, return a response indicating no modifications
+            if not title_changed and not status_changed:
+                return JsonResponse({
+                    "success": True,
+                    "message": "No changes were made.",
+                    "playlist": playlist.serialize()
+                })
+
+            # Check if the new title already exists (only if the title has changed)
+            if title_changed and Playlist.objects.filter(user=user, name=title).exists():
+                return JsonResponse({
+                    "success": False,
+                    "message": "Title already exists."
+                })
+
+            # Update the playlist fields if they have changed
+            if title_changed:
+                playlist.name = title
+            if status_changed:
+                playlist.status = status
+
+            playlist.save()
+
+            return JsonResponse({
+                "success": True,
+                "message": "Playlist modified successfully!",
+                "playlist": playlist.serialize()
+            })
+        except Playlist.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Playlist not found."
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid request method."
+    }, status=405)

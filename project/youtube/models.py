@@ -23,6 +23,7 @@ class User(AbstractUser):
             "id": self.id,
             "followers_count": self.followers_count,
             "username": self.username,
+            "premium": self.premium,
             "description": self.description or '',
             "gender": self.gender,
         }
@@ -199,6 +200,10 @@ class RedeemCode(models.Model):
     uses = models.IntegerField(default=0)
     code = models.CharField(max_length=32, unique=True)
 
+    def __str__(self):
+        return f"Code '{self.code}' - {self.uses} uses left"
+
+
 class ReedemCodeHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.ForeignKey(RedeemCode, on_delete=models.CASCADE)
@@ -212,12 +217,24 @@ class ReedemCodeHistory(models.Model):
 # Create a playlist
 
 class Playlist(models.Model):
+    STATUS_CHOICES=[
+        ('public', 'Public'),
+        ('unlisted', 'Unlisted'),
+        ('private', 'Private'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="playlist")
     name = models.CharField(max_length=64)
     parent_video = models.ForeignKey(Video, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='public', choices=STATUS_CHOICES)
     videosNumber = models.IntegerField(default=1)
-
+    def serialize(self):
+        return{
+            "id": self.id,
+            "name": self.name,
+            "created_at": self.created_at,
+            "status": self.status,
+        }
     def __str__(self):
         return f"User {self.user.username} create playlist '{self.name}' at {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
     
