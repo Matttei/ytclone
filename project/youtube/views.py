@@ -49,7 +49,14 @@ def load_videos(request):
         start = int(request.GET.get('start', 0))
         end = int(request.GET.get('end', start + 9))
 
-        videos = Video.objects.filter(status='public').order_by('-uploaded_at')[start:end]
+        # Extract profile_id from URL 
+        profile_id = request.GET.get('profile_id')
+        # Fetch videos based on the presence of profile_id
+        if profile_id:
+            profile = User.objects.get(pk=profile_id)
+            videos = Video.objects.filter(user=profile, status='public').order_by('-uploaded_at')[start:end]
+        else:
+            videos = Video.objects.filter(status='public').order_by('-uploaded_at')[start:end]
 
         video_list = [
             {
@@ -169,6 +176,9 @@ def profile(request, profile_id):
         try:
             profile = User.objects.get(pk=profile_id)
             videos = Video.objects.filter(user=profile, status = 'public').order_by('-uploaded_at')
+            p = Paginator(videos, 9)
+            page_number = int(request.GET.get('page', 1))
+            page_obj = p.get_page(page_number)
             # Get the user's playlists (if he has)
             playlists = Playlist.objects.filter(user=profile)
             followed = []
@@ -176,7 +186,7 @@ def profile(request, profile_id):
                 followed = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)  
             return render(request, "youtube/profile.html", {
                 "profile": profile,
-                "videos": videos,
+                "videos": page_obj,
                 "playlists": playlists,
                 "followed": followed,
                 "followers": Follower.objects.filter(followed_user=profile),

@@ -140,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let start = 9; // Start loading from the 10th video since first 9 are preloaded
         const quantity = 9;
         let loading = false;
-
+        const profileMatch = window.location.pathname.match(/^\/profile\/(\d+)\/?$/);
+        const profileId = profileMatch ? profileMatch[1] : null;
         window.addEventListener('scroll', () => {
             if (loading) return;
 
@@ -155,7 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         function load() {
-            fetch(`/load_videos?start=${start}&end=${start + quantity}`)
+            let url = `/load_videos?start=${start}&end=${start + quantity}`;
+            if (profileId){
+                url += `&profile_id=${profileId}`;
+            }
+            fetch(url)
                 .then(res => res.json())
                 .then(data => {
                     if (data.videos.length === 0) return; // Stop if no more videos
@@ -1106,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function () {
             editModal.show();
         });
     });
-    // Modify the playlist
+    // Modify the playlist 
     const editPlaylistBtn = document.getElementById('submit-edit-playlist');
     if (editPlaylistBtn){
         editPlaylistBtn.addEventListener('click', function(e){
