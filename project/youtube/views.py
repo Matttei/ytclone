@@ -169,6 +169,19 @@ def upload(request):
 
     return render(request, "youtube/upload.html")
 
+@login_required
+def subscriptions(request):
+    if request.method == 'GET':
+        videos = Video.objects.filter(category='entertainment', status='public')
+        followed_profiles = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)
+        fvideos = Video.objects.filter(user__id__in=followed_profiles).order_by('-uploaded_at')
+        return render(request, "youtube/subscriptions.html",{
+            "videos": fvideos
+        })
+    return JsonResponse({
+    "success": False,
+    "error": "Invalid request method."
+    }, status=400)
 
 
 def profile(request, profile_id):
@@ -214,6 +227,7 @@ def view_video(request, video_id):
             liked = []
             playlists = []
             liked_comments = []
+            parent_comments = Comment.objects.filter(video=video, parent_comment__isnull=True).values_list('id', flat=True)
             if request.user.is_authenticated:
                 playlists = Playlist.objects.filter(user=user)
                 liked = Like.objects.filter(user=request.user).values_list('video__id', flat=True)
@@ -225,6 +239,7 @@ def view_video(request, video_id):
             "liked_comments": liked_comments,
             "playlists": playlists,
             "comments": Comment.objects.filter(video=video, parent_comment=None),
+            "parent_comments": parent_comments,
             "comment_count": Comment.objects.filter(video=video).count()
         })
         except Video.DoesNotExist:
@@ -512,7 +527,12 @@ def video_edit(request, video_id):
 
 def trending_view(request):
     if request.method == 'GET':
-        videos = Video.objects.filter().order_by('-views')
+        allvideos = Video.objects.all().order_by('-views')
+        videos=[]
+        for video in allvideos:
+            if video.views >= 100:
+                videos.append(video)
+
         return render(request, "youtube/trending.html",{
             "videos": videos
         })
@@ -780,3 +800,46 @@ def edit_playlist(request, playlist_id):
         "success": False,
         "message": "Invalid request method."
     }, status=405)
+
+
+# Pin a comment function
+@login_required
+def pin_comment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            video = Video.objects.get(pk=data.get('video'))
+            user = request.user
+            comment = Comment.objects.get(pk=data.get('comment'), video=video)
+            if comment.isPinned is True:
+                return JsonResponse({
+                "success": False,
+                "message": "Comment already pinned!",
+            })
+            if video.hasPinned is True:
+                return JsonResponse({
+                "success": False,
+                "message": "This video has already a video pinned!",
+            })
+            comment.isPinned = True
+            video.hasPinned = True
+            video.save()
+            comment.save()
+            return JsonResponse({
+                "success": True,
+                "message": "Comment pinned!",
+            }) 
+        except Comment.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Playlist not found."
+            })
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+        
+
+
+# Cred ca cel mai bine faci un model pt track la pinuri ca sa dai show/hide la alea pin sau poti sa iei cu djnago cu if sa vezi daca commentu ala e pinnuit gen are aia de ispinned

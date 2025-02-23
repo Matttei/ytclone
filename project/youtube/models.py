@@ -53,6 +53,7 @@ class Video(models.Model):
     video_file = models.FileField(upload_to='videos/', validators=[validate_video_size])
     image_file = models.FileField(upload_to='images/')
     views = models.IntegerField(default=0)
+    hasPinned = models.BooleanField(default=False)
     like_counter = models.IntegerField(default=0)  
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='public')
@@ -120,6 +121,7 @@ class Follower(models.Model):
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comment")
     comment = models.TextField()
+    isPinned = models.BooleanField(default=False)
     like_counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="commented_video")

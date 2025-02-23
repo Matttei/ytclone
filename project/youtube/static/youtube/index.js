@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ----------------------------
     // 6. INFINITE SCROLL FOR VIDEOS
+    // Regular expressions doc - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions
     // ----------------------------
     if (!/^\/video\/\d+\/?$/.test(window.location.pathname)) {
         let start = 9; // Start loading from the 10th video since first 9 are preloaded
@@ -739,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ----------------------------
-    // 14. COMMENT INTERACTIONS (REPLY, DELETE, LIKE, UNLIKE)
+    // 14. COMMENT INTERACTIONS (REPLY, DELETE, LIKE, UNLIKE) + pin !!!
     // ----------------------------
     const commentsContainer = document.querySelector('.comments-container');
     if (commentsContainer) {
@@ -1154,4 +1155,37 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error("Error:", error));
         });
     }
+    // ----------------------------
+    // 19. PIN BUTTON HANDLING
+    // ----------------------------
+    document.querySelectorAll('.pin-comment-button').forEach(button =>{
+        button.addEventListener('click', function(e){
+            e.preventDefault();
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const commentId = this.getAttribute('data-comment-id');
+            const videoId = this.getAttribute('data-video-id');
+
+            // Fetch the request
+            fetch(`/video/pin/`,{
+                method: 'POST',
+                headers:{
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    comment: commentId,
+                    video: videoId,
+                })
+            })
+            .then(res => res.json())
+            .then(data =>{
+                if (data.success){
+                    showMessage(data.message, true);
+                }
+                else{
+                    showMessage(data.message, false);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
 });

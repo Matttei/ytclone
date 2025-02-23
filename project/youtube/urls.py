@@ -8,6 +8,7 @@ urlpatterns = [
     path("register/", views.register, name="register"),
 
     path('upload/', views.upload, name="upload"),
+    path('subscriptions/', views.subscriptions, name="subscriptions"),
     path('profile/<int:profile_id>/', views.profile, name="user_profile"),
     path('video/<int:video_id>/', views.view_video, name="view_video"),
     path('video/report/<int:video_id>/', views.report_video, name="report_video"),
@@ -32,5 +33,6 @@ urlpatterns = [
     path('video/addToPlaylist/<int:video_id>/', views.addToPlaylist, name="addToPlaylist"),
     path('playlist/<int:playlist_id>/', views.view_playlist, name="view_playlist"),
     path('load_videos/', views.load_videos, name="load_videos"),
-    path('playlist/edit/<int:playlist_id>/', views.edit_playlist, name="edit_playlist")
+    path('playlist/edit/<int:playlist_id>/', views.edit_playlist, name="edit_playlist"),
+    path('video/pin/', views.pin_comment, name="pin_comment")
 ]

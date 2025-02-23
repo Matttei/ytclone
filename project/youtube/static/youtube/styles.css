@@ -47,6 +47,31 @@ body {
 .navbar-toggler:hover {
     transform: rotate(90deg);
 }
+/* Scrollbar  */
+::-webkit-scrollbar {
+    width: 8px; 
+}
+
+/* Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.5); 
+    border-radius: 10px; 
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 100, 100, 0.8); 
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 /* Sidebar Styling */
 .sidebar {
     position: fixed;
@@ -63,10 +88,9 @@ body {
     overflow-y: auto; /* Enables scrolling */
     padding-top: 20px;
 }
-
 /* Hide scrollbar for WebKit browsers */
 .sidebar::-webkit-scrollbar {
-    width: 5px;
+    width: 3px;
 }
 
 .sidebar::-webkit-scrollbar-thumb {
@@ -366,7 +390,7 @@ body {
 /* Video Page Styles */
 .video-page {
     margin-top: 100px;
-    width: 100%;
+    width: 95%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -941,16 +965,8 @@ body {
 .views{
     transform: translateY(-10px);
 }
-.video-container-trending {
-    border: 2px solid transparent;
-    border-image: linear-gradient(to bottom, 
-        white, 
-        rgba(255, 0, 0, 0.1), 
-        rgba(255, 0, 0, 0.3), 
-        rgba(255, 0, 0, 0.6), 
-        rgb(255, 3, 3)
-    ) 1;
- }
+
+
 .star-rating {
     direction: rtl;
     display: inline-block;

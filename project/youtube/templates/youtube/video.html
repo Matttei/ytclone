@@ -155,6 +155,9 @@
                                     DELETE <i class="bi bi-trash"></i>
                                 </button>
                                 {% endif %}
+                                {% if request.user.id == video.user.id and comment.id in parent_comments %}
+                                    <button class="btn btn-warning btn-sm pin-comment-button" id="pin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}">PIN</button>
+                                {% endif %}
                             </div>
                         </div>
                         <!-- Reply Section -->
