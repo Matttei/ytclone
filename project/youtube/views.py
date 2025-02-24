@@ -238,7 +238,7 @@ def view_video(request, video_id):
             "liked": liked,
             "liked_comments": liked_comments,
             "playlists": playlists,
-            "comments": Comment.objects.filter(video=video, parent_comment=None),
+            "comments": Comment.objects.filter(video=video, parent_comment=None).order_by('-isPinned', '-created_at'),
             "parent_comments": parent_comments,
             "comment_count": Comment.objects.filter(video=video).count()
         })
@@ -606,19 +606,24 @@ def comment_delete(request, comment_id):
     if request.method == 'POST':
         try:
             comment = Comment.objects.get(pk=comment_id)
-            
+            data =  json.loads(request.body)
+            videoId = data.get('videoId')
+            video = Video.objects.get(pk=videoId)
             # Check if the user is the video owner or the comment owner (if needed)
             if request.user != comment.video.user and request.user != comment.user:
                 return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
-            
+            # Check if the comment was pinned
+            if comment.isPinned:
+                video.hasPinned = False
+                video.save()
             comment.delete()
             return JsonResponse({
                 "success": True,
                 "count": Comment.objects.filter(video=comment.video).count()
             })
         
-        except (Comment.DoesNotExist, User.DoesNotExist):
-            return JsonResponse({"success": False, "error": "Comment/User not found"}, status=404)
+        except (Comment.DoesNotExist, User.DoesNotExist, Video.DoesNotExist):
+            return JsonResponse({"success": False, "error": "Comment/User/Video not found"}, status=404)
     
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
 
@@ -811,12 +816,12 @@ def pin_comment(request):
             video = Video.objects.get(pk=data.get('video'))
             user = request.user
             comment = Comment.objects.get(pk=data.get('comment'), video=video)
-            if comment.isPinned is True:
+            if comment.isPinned:
                 return JsonResponse({
                 "success": False,
                 "message": "Comment already pinned!",
             })
-            if video.hasPinned is True:
+            if video.hasPinned:
                 return JsonResponse({
                 "success": False,
                 "message": "This video has already a video pinned!",
@@ -839,7 +844,44 @@ def pin_comment(request):
                 "success": False,
                 "message": str(e)
             }, status=500)
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid request method."
+    }, status=405)
         
-
-
-# Cred ca cel mai bine faci un model pt track la pinuri ca sa dai show/hide la alea pin sau poti sa iei cu djnago cu if sa vezi daca commentu ala e pinnuit gen are aia de ispinned
+@login_required
+def unpin_comment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            video = Video.objects.get(pk=data.get('video'))
+            user = request.user
+            comment = Comment.objects.get(pk=data.get('comment'), video=video)
+            # Make sure that the comment is pinned
+            if comment.isPinned:
+                comment.isPinned = False
+                video.hasPinned = False
+                video.save()
+                comment.save()
+                return JsonResponse({
+                        "success": True,
+                        "message": "Comment unpinned!",
+                    })
+            return JsonResponse({
+                        "success": False,
+                        "message": "Comment is not pinned!",
+                    })
+        except Comment.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Playlist not found."
+            })
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid request method."
+    }, status=405)

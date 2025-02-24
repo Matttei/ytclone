@@ -662,6 +662,9 @@ body {
     .video-card{
         width: 100% !important;
     }
+    .pinned-text{
+        display: none;
+    }
 }
 .login-page {
     min-height: 100vh;

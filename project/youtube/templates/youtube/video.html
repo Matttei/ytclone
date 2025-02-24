@@ -114,6 +114,11 @@
                                 <span class="uploader-badge me-2">Uploader</span>
                                 {% endif %}
                                 <strong><a href="{% url 'user_profile' comment.user.id %}" class="text-decoration-none" style="color: black;">{{ comment.user.username }}</a></strong>
+                                {% if comment.isPinned %}
+                                <i class="ml-3 bi bi-pin"  id="pinned-zone-{{comment.id}}"><span class="pinned-text">Pinned</span></i>
+                                {% else %}
+                                <i class="ml-3 bi bi-pin d-none pinned-zone" id="pinned-zone-{{comment.id}}" data-comment-id="{{comment.id}}"><span class="pinned-text">Pinned</span></i>
+                                {% endif %}
                             </div>
                             <small class="text-muted">{{ comment.created_at|date:"M d, Y h:i A" }}</small>
                         </div>
@@ -125,38 +130,44 @@
                             <div class="d-flex align-items-center">
                                 {% if comment.id in liked_comments %}
                                 <button class="btn btn-outline-primary btn-sm me-2 like-comment-button d-none" data-comment-id="{{ comment.id }}" id="like-comment-button-{{ comment.id }}">
-                                    👍 Like
+                                    👍
                                 </button>
                                 <button class="btn btn-danger btn-sm me-2 unlike-comment-button" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{ comment.id }}">
                                     💔🔨
                                 </button>
                                 {% else %}
                                 <button class="btn btn-outline-primary btn-sm me-2 like-comment-button" data-comment-id="{{ comment.id }}" id="like-comment-button-{{ comment.id }}">
-                                    👍 Like
+                                    👍
                                 </button>
                                 <button class="btn btn-danger btn-sm me-2 unlike-comment-button d-none" data-comment-id="{{ comment.id }}" id="unlike-comment-button-{{ comment.id }}">
                                     💔🔨
                                 </button>
                                 {% endif %}
-                                <span id="comment-like-counter-{{ comment.id }}" class="text-muted">Likes: {{ comment.like_counter }}</span>
+                                <span id="comment-like-counter-{{ comment.id }}" class="text-muted"><span class="pinned-text">Likes: </span>{{ comment.like_counter }}</span>
                             </div>
                             <!-- Reply and Delete Buttons -->
-                            <div>
+                            <div class="d-flex justify-content-between">
                                 <button class="btn btn-outline-secondary btn-sm reply-button mr-2" 
                                         data-bs-toggle="collapse" 
                                         data-comment-id="{{ comment.id }}"
                                         data-bs-target="#reply-to-{{ comment.id }}" 
                                         aria-expanded="false" 
                                         aria-controls="reply-to-{{ comment.id }}">
-                                    💬 Reply
+                                        💬 Reply
                                 </button>
                                 {% if request.user.id == video.user.id or request.user.id == comment.user.id %}
-                                <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{ comment.id }}" data-video-id="{{video.id}}">
-                                    DELETE <i class="bi bi-trash"></i>
+                                <button class="btn btn-danger btn-sm delete-comment-button mr-1" id="delete-comment-button-{{ comment.id }}" data-comment-id="{{ comment.id }}" data-video-id="{{video.id}}">
+                                    DELETE<i class="bi bi-trash"></i>
                                 </button>
                                 {% endif %}
-                                {% if request.user.id == video.user.id and comment.id in parent_comments %}
-                                    <button class="btn btn-warning btn-sm pin-comment-button" id="pin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}">PIN</button>
+                                {% if request.user.id == video.user.id and comment.id in parent_comments and video.hasPinned is False%}
+                                    <button class="btn btn-warning btn-sm pin-comment-button" id="pin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}"><i class="bi bi-pin"></i> Pin</button>
+                                    <button class="btn btn-warning btn-sm unpin-comment-button d-none" id="unpin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}">UnPin <i class="bi bi-pin-angle"></i></button>
+                                {% elif comment.isPinned is True %}
+                                    <button class="btn btn-warning btn-sm unpin-comment-button" id="unpin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}">UnPin <i class="bi bi-pin-angle"></i></button>
+                                    <button class="btn btn-warning btn-sm pin-comment-button d-none" id="pin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}"><i class="bi bi-pin"></i> Pin</button>
+                                {% else %}
+                                <button class="btn btn-warning btn-sm pin-comment-button d-none" id="pin-comment-button-{{comment.id}}" data-comment-id="{{comment.id}}" data-video-id="{{video.id}}"><i class="bi bi-pin"></i> Pin</button>
                                 {% endif %}
                             </div>
                         </div>

@@ -659,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         </button>
                                         <span id="comment-like-counter-${data.comment.id}" class="text-muted">0 Likes</span>
                                     </div>
-                                    <div>
+                                    <div class="d-flex justify-content-between">
                                         <button class="btn btn-outline-secondary btn-sm reply-button mr-2"
                                                 data-bs-toggle="collapse" 
                                                 data-bs-target="#reply-to-${data.comment.id}" 
@@ -670,6 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <button class="btn btn-danger btn-sm delete-comment-button" id="delete-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}" data-video-id="${data.video.id}">
                                             DELETE <i class="bi bi-trash"></i>
                                         </button>
+                                        ${data.video.hasPinned ? `<button class="btn btn-warning btn-sm unpin-comment-button d-none" id="pin-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}" data-video-id="${data.video.id}">UnPin<i class="bi bi-pin-angle"></i></button>` : `<button class="btn btn-warning btn-sm pin-comment-button" id="pin-comment-button-${data.comment.id}" data-comment-id="${data.comment.id}" data-video-id="${data.video.id}"><i class="bi bi-pin"></i> Pin</button>`}
                                     </div>
                                 </div>
                                 
@@ -740,12 +741,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ----------------------------
-    // 14. COMMENT INTERACTIONS (REPLY, DELETE, LIKE, UNLIKE) + pin !!!
+    // 14. COMMENT INTERACTIONS (REPLY, DELETE, LIKE, UNLIKE, PIN, UNPIN)
     // ----------------------------
     const commentsContainer = document.querySelector('.comments-container');
     if (commentsContainer) {
         commentsContainer.addEventListener('click', function (e) {
-            // Reply action
+            // REPLY FEATURE (INFINITE REPLIES)
             if (e.target.classList.contains('reply-comment-button')) {
                 const videoId = e.target.getAttribute('data-video-id');
                 const parentNodeId = e.target.getAttribute('data-comment-id');
@@ -869,7 +870,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         e.target.disabled = false;
                     });
             }
-            // Delete a comment
+            // DELETE A COMMENT FEATURE
             else if (e.target.classList.contains('delete-comment-button')) {
                 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 const commentId = e.target.getAttribute('data-comment-id');
@@ -882,6 +883,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         'X-CSRFToken': csrfToken,
                         'Content-Type': 'application/json'
                     },
+                    body: JSON.stringify({videoId: videoId}),
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -894,7 +896,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .catch(error => console.error("Error:", error));
             }
-            // Like a comment
+            // LIKE A COMMENT FEATURE
             else if (e.target.classList.contains('like-comment-button')) {
                 const commentId = e.target.getAttribute('data-comment-id');
                 const likeBtn = document.querySelector(`#like-comment-button-${commentId}`);
@@ -922,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         console.error("Error:", error);
                     });
             }
-            // Unlike a comment
+            // UNLIKE A COMMENT FEATURE
             else if (e.target.classList.contains('unlike-comment-button')) {
                 const commentId = e.target.getAttribute('data-comment-id');
                 const likeBtn = document.querySelector(`#like-comment-button-${commentId}`);
@@ -950,11 +952,91 @@ document.addEventListener('DOMContentLoaded', function () {
                         console.error("Error:", error);
                     });
             }
+            // PIN A COMMENT FEATURE
+            else if(e.target.classList.contains('pin-comment-button')){
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const commentId = e.target.getAttribute('data-comment-id');
+                const videoId = e.target.getAttribute('data-video-id');
+                const unPinBtn = document.getElementById(`unpin-comment-button-${commentId}`);
+                const PinBtn = document.getElementById(`pin-comment-button-${commentId}`);
+                const commentContainer = document.getElementById(`comment-${commentId}`);
+                const pinText = document.getElementById(`pinned-zone-${commentId}`);
+                const commentsList = document.querySelector('.list-unstyled');
+                fetch(`/video/pin/`,{
+                    method: 'POST',
+                    headers:{
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        comment: commentId,
+                        video: videoId,
+                    })
+                })
+                .then(res => res.json())
+                .then(data =>{
+                    if (data.success){
+                        showMessage(data.message, true);
+                        // Add the Pin text
+                        pinText.classList.remove('d-none')
+                        // Prepend the comment
+                        if (commentsContainer && commentsList){
+                            commentsList.prepend(commentContainer);
+                        }
+                        // Set pin d-none for every comment
+                        document.querySelectorAll('.pin-comment-button').forEach(button =>{
+                            button.classList.add('d-none');
+                        })
+                        unPinBtn.classList.remove('d-none');
+                    }
+                    else{
+                        showMessage(data.message, false);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+            //  UNPIN A COMMENT FEATURE
+            else if(e.target.classList.contains('unpin-comment-button')){
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const commentId = e.target.getAttribute('data-comment-id');
+                const videoId = e.target.getAttribute('data-video-id');
+                const unPinBtn = document.getElementById(`unpin-comment-button-${commentId}`);
+                const PinBtn = document.getElementById(`pin-comment-button-${commentId}`);
+                const commentContainer = document.getElementById(`comment-${commentId}`);
+                const commentsList = document.querySelector('.list-unstyled');
+                const pinText = document.getElementById(`pinned-zone-${commentId}`);
+                fetch(`/video/unpin/`, {
+                    method: 'POST',
+                    headers:{
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body:JSON.stringify({video: videoId,
+                        comment: commentId,
+                    })
+                })
+                .then(res => res.json())
+                .then(data =>{
+                    if (data.success){
+                        // Remove the pin text
+                        pinText.classList.add('d-none');
+                        // Remove the Unpin button
+                        unPinBtn.classList.add('d-none');
+                        // Remove all pin buttons
+                        document.querySelectorAll('.pin-comment-button').forEach(button =>{
+                            button.classList.remove('d-none');
+                        })
+                        showMessage(data.message, true);
+                    }
+                    else{
+                        showMessage(data.message, false);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
         });
     }
 
     // ----------------------------
-    // 15. COMMENT BUTTON SCROLL
+    // 15.  BUTTON SCROLL
     // ----------------------------
     const commentButton = document.querySelector('.btn-success');
     if (commentButton) {
@@ -1155,37 +1237,4 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error("Error:", error));
         });
     }
-    // ----------------------------
-    // 19. PIN BUTTON HANDLING
-    // ----------------------------
-    document.querySelectorAll('.pin-comment-button').forEach(button =>{
-        button.addEventListener('click', function(e){
-            e.preventDefault();
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            const commentId = this.getAttribute('data-comment-id');
-            const videoId = this.getAttribute('data-video-id');
-
-            // Fetch the request
-            fetch(`/video/pin/`,{
-                method: 'POST',
-                headers:{
-                    'X-CSRFToken': csrfToken,
-                },
-                body: JSON.stringify({
-                    comment: commentId,
-                    video: videoId,
-                })
-            })
-            .then(res => res.json())
-            .then(data =>{
-                if (data.success){
-                    showMessage(data.message, true);
-                }
-                else{
-                    showMessage(data.message, false);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        });
-    });
 });

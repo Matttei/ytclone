@@ -34,5 +34,6 @@ urlpatterns = [
     path('playlist/<int:playlist_id>/', views.view_playlist, name="view_playlist"),
     path('load_videos/', views.load_videos, name="load_videos"),
     path('playlist/edit/<int:playlist_id>/', views.edit_playlist, name="edit_playlist"),
-    path('video/pin/', views.pin_comment, name="pin_comment")
+    path('video/pin/', views.pin_comment, name="pin_comment"),
+    path('video/unpin/', views.unpin_comment, name="unpin_comment")
 ]
