@@ -161,6 +161,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (profileId){
                 url += `&profile_id=${profileId}`;
             }
+            if (window.location.pathname === "/trending/"){
+                url += '&trending=True'
+            }
             fetch(url)
                 .then(res => res.json())
                 .then(data => {

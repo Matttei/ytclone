@@ -40,8 +40,7 @@
                             <div class="dropdown-menu dropdown-menu-end">
                                 <div class="menu-row">
                                     <a class="menu-link" href="{% url 'user_profile' user.id%}">Profile</a>
-                                    <a class="menu-link following d-flex justify-content-inline" href="/">
-                                        <i class="bi bi-person-check mr-2"></i>
+                                    <a class="menu-link following d-flex justify-content-inline" href="{% url 'subscriptions' %}">
                                         <span class="nav-text">Subscriptions</span></a>
                                     <a class="menu-link" href="{% url 'upload' %}">Upload</a>
                                 </div>

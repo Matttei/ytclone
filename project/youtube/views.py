@@ -51,13 +51,19 @@ def load_videos(request):
 
         # Extract profile_id from URL 
         profile_id = request.GET.get('profile_id')
+        trending = request.GET.get('trending')
+        allvideos = Video.objects.all()
+        videos = []
         # Fetch videos based on the presence of profile_id
         if profile_id:
             profile = User.objects.get(pk=profile_id)
             videos = Video.objects.filter(user=profile, status='public').order_by('-uploaded_at')[start:end]
+        elif trending:
+            for video in allvideos:
+                if video.views >= 100:
+                    videos.append(video)
         else:
             videos = Video.objects.filter(status='public').order_by('-uploaded_at')[start:end]
-
         video_list = [
             {
                 "id": video.id,
@@ -238,7 +244,7 @@ def view_video(request, video_id):
             "liked": liked,
             "liked_comments": liked_comments,
             "playlists": playlists,
-            "comments": Comment.objects.filter(video=video, parent_comment=None).order_by('-isPinned', '-created_at'),
+            "comments": Comment.objects.filter(video=video, parent_comment=None).order_by('-isPinned', '-like_counter'),
             "parent_comments": parent_comments,
             "comment_count": Comment.objects.filter(video=video).count()
         })
