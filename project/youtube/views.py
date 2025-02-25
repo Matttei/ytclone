@@ -7,27 +7,14 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.urls import reverse
 from django.shortcuts import redirect
-from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from .models import User, Video, validate_video_size, Report, Follower, Like, Comment, CommentLike, WatchHistory, Feedback, RedeemCode, ReedemCodeHistory, Playlist, addPlaylist
 from django.contrib import messages
-import requests
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
-from ipware import get_client_ip
-from django.core.paginator import Paginator
-from django.shortcuts import render
-import requests
 
 def index(request):
     try:
-        ip, is_routable = get_client_ip(request)
-        token = "98d1607a25f0ca"
-        url = f"https://www.ipinfo.io/{ip}?token={token}"
-        response = requests.get(url)
-
-        region = response.json().get('country', 'Unknown') if response.status_code == 200 else "Error retrieving location"
-
         videos = Video.objects.filter(status='public').order_by('-uploaded_at')
         p = Paginator(videos, 9)
         page_number = int(request.GET.get('page', 1))
@@ -38,7 +25,7 @@ def index(request):
             followed_profiles = Follower.objects.filter(user=request.user).values_list('followed_user', flat=True)
             fvideos = Video.objects.filter(user__id__in=followed_profiles).order_by('-uploaded_at')
 
-        return render(request, "youtube/index.html", {"region": region, "videos": page_obj, "fvideos": fvideos})
+        return render(request, "youtube/index.html", {"videos": page_obj, "fvideos": fvideos})
 
     except Exception as e:
         return render(request, "youtube/index.html", {"region": f"Error: {e}"})
