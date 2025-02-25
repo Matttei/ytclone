@@ -7,7 +7,9 @@
 {% block body %}
 <div class="index">
     <h1 class="text-center mb-5 mt-5">Videos <i style="color: red;"  class="bi bi-play-circle-fill"></i></h1>
-    <h2>{{message}}</h2>
+    {% if message %}
+    <h3 class="message">{{message}}</h3>
+    {% endif %}
     <div class="videos ml-5 mr-5  p-5 shadow-sm rounded-4">
         <div class="row">
             {% for video in videos %}

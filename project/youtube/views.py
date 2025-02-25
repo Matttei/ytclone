@@ -737,6 +737,10 @@ def view_playlist(request, playlist_id):
         try:
             playlist = Playlist.objects.get(pk=playlist_id)
             videos = addPlaylist.objects.filter(playlist=playlist).order_by('-added_at')
+            if playlist.status == 'private' and not request.user == playlist.user:
+                return render(request, 'youtube/index.html',{
+                    "message": "The playlist is not visible for you!"
+                })
             return render(request, "youtube/playlist.html",{
                 "videos": videos,
                 "playlist": playlist
