@@ -143,6 +143,7 @@ body {
     .video-card{
         width: 50% !important;
     }
+    
 }
 .sidebar.active {
     left: 0px !important;
@@ -820,13 +821,117 @@ body {
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Comment and report button hover effects */
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); 
+/* Form container styling */
+#saveform {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
+/* Playlist radio options styling */
+.form-check {
+  margin: 0.75em 0;
+  padding: 0;
+  transition: all 0.2s ease;
+}
 
+.form-check-input {
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.form-check-label {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.form-check-input:checked + .form-check-label {
+  background-color: rgba(40, 167, 69, 0.1);
+  font-weight: 500;
+}
+
+/* Hover effect for labels */
+.form-check-label:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Button styling */
+.btn {
+  font-weight: 500;
+  padding: 10px 5px;
+  border-radius: 6px;
+  transition: all 0.25s ease-in-out;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  background-color: #218838;
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.btn-light {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.btn-light:hover {
+  background-color: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Create playlist section styling */
+#createPlaylistSection {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-control, .form-select {
+  padding: 0.7rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Gap between buttons */
+.gap-3 {
+  margin-top: 1rem;
+}
 .btn-danger {
     transition: transform 0.2s ease;
 }
